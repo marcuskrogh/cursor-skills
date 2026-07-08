@@ -90,6 +90,7 @@ Use `/manage-skills` in Agent chat for the full checklist.
 | `sync-local.ps1` / `sync-local.sh` | Copy or link skills to `~/.cursor/skills/` |
 | `install-to-project.ps1` | Copy skills or add submodule to a project |
 | `validate-skills.ps1` | Check frontmatter and naming |
+| `arxiv_research.py` | arXiv search/lookup/snowball helper (stdlib, MCP-free) |
 | `setup-github.ps1` | First-time push to GitHub |
 
 ## Current skills

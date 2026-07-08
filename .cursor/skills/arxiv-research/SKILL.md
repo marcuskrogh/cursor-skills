@@ -2,17 +2,18 @@
 name: arxiv-research
 description: >-
   Investigates a user-described research topic through arXiv using the official
-  export.arxiv.org Atom API. Plans search strategy, retrieves and triages papers,
-  deep-reads the most relevant hits, and delivers a structured research brief with
-  citations. Use when the user wants literature review, paper discovery, state of
-  the art, or research on a topic via arXiv.
+  export.arxiv.org Atom API via scripts/arxiv_research.py. Plans search strategy,
+  runs batched queries with built-in rate limiting, triages papers, snowballs from
+  seed hits, and delivers a structured research brief with citations. Use when the
+  user wants literature review, paper discovery, state of the art, or research on
+  a topic via arXiv.
 ---
 
 # arXiv Research
 
-Systematic literature investigation on arXiv for a user-described topic. Uses the **official arXiv Atom API** (`https://export.arxiv.org/api/query`) — stable, public, no auth, no scraping.
+Systematic literature investigation on arXiv for a user-described topic.
 
-Read [reference.md](reference.md) for query syntax, field prefixes, date ranges, and XML field mapping.
+**Primary tool:** `scripts/arxiv_research.py` — stdlib Python, MCP-free, calls the official arXiv Atom API, returns structured JSON. Read [reference.md](reference.md) for query syntax and output schema.
 
 ## When to use
 
@@ -24,15 +25,17 @@ Read [reference.md](reference.md) for query syntax, field prefixes, date ranges,
 
 ## Data source (mandatory)
 
-Use the **arXiv Atom API** as the primary retrieval path:
+Use `scripts/arxiv_research.py` as the **first** retrieval path:
 
 ```bash
-curl -sL "https://export.arxiv.org/api/query?<params>"
+python3 scripts/arxiv_research.py search -q 'all:topic AND cat:cs.LG' --max-results 25
+python3 scripts/arxiv_research.py lookup --ids 1706.03762,2312.00752
+python3 scripts/arxiv_research.py snowball --ids 1706.03762 --max-results 20
 ```
 
-Alternatives when Shell is unavailable: `WebFetch` on the same HTTPS URL.
+The script handles URL encoding, rate limiting (≥3 s between API calls), Atom XML parsing, deduplication, and JSON output.
 
-Do **not** scrape `arxiv.org/search` unless the request needs DOI, ORCID, ACM, or MSC lookup (see reference.md). Even then, extract IDs from HTML and re-fetch metadata via the API.
+**Fallback** (only if Python is unavailable): `curl -sL` on `https://export.arxiv.org/api/query?...` or `WebFetch` on the same URL. Do **not** scrape `arxiv.org/search` unless the request needs DOI, ORCID, ACM, or MSC lookup (see reference.md).
 
 ## Workflow
 
@@ -49,7 +52,7 @@ Before searching, pin down:
 | **Depth** | Quick scan (5–10 papers) vs thorough review (25–50+) |
 | **Exclusions** | Topics, methods, or application areas to skip |
 
-If the user's message is already specific, infer reasonable defaults and state them briefly. Ask **one** clarifying question only when a wrong assumption would waste the search (e.g. "ML transformers" vs "electrical transformers").
+If the user's message is already specific, infer reasonable defaults and state them briefly. Ask **one** clarifying question only when a wrong assumption would waste the search.
 
 ### 2. Plan the search strategy
 
@@ -58,70 +61,97 @@ Design **2–4 complementary queries**, not one monolithic string:
 1. **Broad discovery** — `all:` terms + optional `cat:` filter
 2. **Title-focused** — `ti:"key phrase"` for landmark papers
 3. **Abstract-focused** — `abs:` terms for methodological overlap
-4. **Recency slice** — same query + `submittedDate:` window, `sortBy=submittedDate&sortOrder=descending`
+4. **Recency slice** — same query + `submittedDate:` window
 5. **Author anchor** (if user names researchers) — `au:lastname`
 
-Record the planned queries in your working notes before executing.
+Record the planned queries before executing.
 
-### 3. Execute API searches
+### 3. Execute searches (one script call)
 
-For each query:
+Run **all planned queries in a single invocation** — the script throttles internally and deduplicates:
 
-1. Build the URL (see reference.md).
-2. Fetch with `curl -sL` or `WebFetch`.
-3. Parse Atom XML: `totalResults`, then each `entry` (title, authors, abstract, dates, categories, links).
-4. **Wait ≥ 3 seconds** between requests (arXiv best practice).
-5. Paginate with `start` + `max_results` only when `totalResults` exceeds the first page. Use `max_results=25`–`50` per page.
+```bash
+python3 scripts/arxiv_research.py search \
+  -q 'all:retrieval+augmented+generation+AND+cat:cs.CL' \
+  -q 'ti:"retrieval+augmented"' \
+  -q 'abs:RAG+AND+submittedDate:[202301010000+TO+202512312359]' \
+  --max-results 50 \
+  --sort submittedDate \
+  --order descending
+```
 
-**Default sort:**
+**Sort defaults:**
 
-| Intent | Sort |
-|--------|------|
-| Seminal / foundational | `sortBy=relevance` |
-| Latest work | `sortBy=submittedDate&sortOrder=descending` |
-| Recently updated surveys | `sortBy=lastUpdatedDate&sortOrder=descending` |
+| Intent | Flags |
+|--------|-------|
+| Seminal / foundational | default (`relevance`) |
+| Latest work | `--sort submittedDate --order descending` |
+| Recently updated surveys | `--sort lastUpdatedDate --order descending` |
 
-Stop fetching when you have enough high-quality candidates for the requested depth, or when additional pages yield diminishing relevance.
+**Lookup known papers** in the same pass when IDs are known:
 
-### 4. Triage and rank
+```bash
+python3 scripts/arxiv_research.py lookup --ids 1706.03762,2401.12345
+```
 
-Merge results across queries. Deduplicate by canonical arXiv ID (strip `vN` suffix).
+**Pagination** (only when `total_results` exceeds one page and more depth is needed):
+
+```bash
+python3 scripts/arxiv_research.py search -q 'all:topic' --max-results 50 --start 50
+```
+
+Use `--paginate` to fetch all pages for a query (respects rate limits; use sparingly).
+
+Stop when you have enough high-quality candidates, or when additional pages yield diminishing relevance.
+
+### 4. Snowball from core papers
+
+After identifying 2–5 **core** seed papers, expand coverage in one call:
+
+```bash
+python3 scripts/arxiv_research.py snowball \
+  --ids 1706.03762,2312.00752 \
+  --max-results 20 \
+  --years-back 3
+```
+
+The script fetches seeds, extracts top authors and categories, runs follow-up queries for recent related work, and excludes the seeds from results. Merge snowball hits into the candidate pool.
+
+### 5. Triage and rank
+
+Work from the script's JSON `papers` array. Papers appearing in multiple `source_queries` are stronger candidates.
 
 Score each paper on:
 
 - **Relevance** — matches the scoped question
-- **Recency** — `published` date vs time horizon
-- **Centrality** — citation proxies: author reputation, title/abstract signals ("survey", "review"), recurrence across queries
-- **Quality signals** — clear problem statement, reproducibility mentions, journal_ref / DOI when present
+- **Recency** — `submitted_date` vs time horizon
+- **Centrality** — recurrence across queries, author/category snowball hits, title/abstract signals ("survey", "review")
+- **Quality signals** — clear problem statement, `journal_ref` / `doi` when present
 
 Produce a short ranked shortlist:
 
 | Tier | Size | Action |
 |------|------|--------|
-| **Core** | 3–8 | Deep read (abstract + metadata; PDF only if user needs detail) |
+| **Core** | 3–8 | Deep read (abstract + metadata) |
 | **Supporting** | 5–15 | Cite in synthesis with one-line relevance |
 | **Peripheral** | rest | Mention only if they fill a gap |
 
-Drop obvious false positives (wrong domain, tangential keywords).
+### 6. Deep read (core papers)
 
-### 5. Deep read (core papers)
-
-For each **Core** paper, extract:
+For each **Core** paper, extract from JSON fields:
 
 - **Problem** — what gap or question
 - **Approach** — method / architecture / theory
 - **Contribution** — main claim vs prior work
-- **Evidence** — datasets, benchmarks, theorems (from abstract + comment field)
+- **Evidence** — datasets, benchmarks, theorems (from `abstract` + `comment`)
 - **Limitations** — stated or inferable caveats
-- **Links** — `abs` and `pdf` URLs from Atom `link` elements
+- **Links** — `abs_url`, `pdf_url`
 
-Fetch individual records with `id_list=` when you need full metadata for a known ID.
+Do not hallucinate paper content. If the abstract is insufficient, say so.
 
-Do not hallucinate paper content. If the abstract is insufficient, say so and offer to fetch the PDF summary.
+### 7. Synthesize findings
 
-### 6. Synthesize findings
-
-Deliver a **structured research brief**. Adapt sections to the user's intent; always include citations with arXiv links.
+Deliver a **structured research brief**. Always include citations with arXiv links.
 
 ```markdown
 # Research brief: <topic>
@@ -130,7 +160,7 @@ Deliver a **structured research brief**. Adapt sections to the user's intent; al
 <Restated research question and scope>
 
 ## Search strategy
-<Queries run, categories, date window, result counts>
+<Script commands run, queries, result counts>
 
 ## Executive summary
 <3–6 sentences: main themes, consensus, open questions>
@@ -143,63 +173,60 @@ Deliver a **structured research brief**. Adapt sections to the user's intent; al
 - **Relevance:** …
 - **Takeaway:** …
 
-(repeat for core papers)
-
 ## Themes and trends
-<Grouped findings: methods, applications, datasets, theory>
+<Grouped findings>
 
 ## Gaps and limitations
-<What arXiv coverage suggests is under-explored or contested>
+<Under-explored or contested areas>
 
 ## Recommended reading order
-<Ordered list for someone new to the topic>
+<Ordered list for newcomers>
 
 ## Sources
-<Bulleted list of all cited arXiv IDs with abs URLs>
+<Bulleted arXiv IDs with abs URLs>
 ```
 
-### 7. Offer follow-ups
+### 8. Offer follow-ups
 
-After the brief, offer (only if natural):
-
-- Narrow or broaden the search
-- Extend the date window
-- Compare two sub-topics
-- Track a specific author or method line
+After the brief, offer (only if natural): narrow/broaden search, extend date window, snowball from new seeds, compare sub-topics.
 
 ## Operational rules
 
-1. **API first** — never default to HTML scraping.
-2. **HTTPS + redirects** — always `https://export.arxiv.org/...`; use `curl -sL` or equivalent.
-3. **Rate limit** — ≥ 3 s between API calls in a loop.
-4. **Trim XML text** — titles and abstracts often have leading whitespace.
-5. **Canonical IDs** — store `1706.03762`, not `1706.03762v7`, unless version matters.
-6. **Honest coverage** — arXiv is preprints; note peer-review status. Absence of results is a finding.
-7. **No fabrication** — every claim about a paper must trace to fetched metadata.
-8. **Proportional depth** — a quick scan is 1–2 queries and a short summary; a thorough review uses the full workflow.
+1. **Script first** — one `search` call with multiple `-q` flags beats many sequential `curl` calls.
+2. **MCP-free** — do not require MCP servers; the script is the standard path.
+3. **Honest coverage** — arXiv is preprints; note peer-review status.
+4. **No fabrication** — every claim must trace to script JSON output.
+5. **Proportional depth** — quick scan: 1 script call; thorough review: search + snowball.
+6. **Canonical IDs** — use `arxiv_id` field (no `vN` suffix) unless version matters.
 
 ## Anti-patterns
 
-- Single vague query (`all:AI`) with no category or date filter
-- Ignoring `totalResults` and reporting only the first page as exhaustive
-- Citing papers not returned by a search or `id_list` fetch
-- Bursting dozens of API requests without throttling
+- Multiple separate script invocations when one `search -q ... -q ...` suffices
+- Hand-parsing Atom XML when the script is available
+- Ignoring `total_results` and treating the first page as exhaustive
+- Citing papers not present in script output
 - Scraping search HTML when the API suffices
-- Long preamble before delivering findings
 
 ## Quick examples
 
-**User:** "Recent work on diffusion models for protein design"
+**Recent diffusion models for protein design:**
 
-**Agent moves:**
-1. Scope: last 2 years, `q-bio` / `cs.LG`, survey depth ~15 papers
-2. Queries: `all:diffusion+protein+design+AND+cat:q-bio`, `ti:"protein"+AND+abs:diffusion`, recency slice with `submittedDate`
-3. Triage → 5 core, 8 supporting
-4. Synthesize brief with themes (structure prediction, sequence design, benchmarks)
+```bash
+python3 scripts/arxiv_research.py search \
+  -q 'all:diffusion+protein+design+AND+cat:q-bio' \
+  -q 'ti:"protein"+AND+abs:diffusion' \
+  -q 'all:diffusion+AND+cat:q-bio+AND+submittedDate:[202401010000+TO+202512312359]' \
+  --max-results 30 --sort submittedDate --order descending
+```
 
-**User:** "Find the Transformer paper and related attention work from 2017"
+Then triage → brief.
 
-**Agent moves:**
-1. `id_list=1706.03762` for canonical paper
-2. `all:attention+AND+submittedDate:%5B201701010000+TO+201712312359%5D+AND+cat:cs.CL`
-3. Brief positioning Transformer among contemporaneous attention papers
+**Transformer paper + 2017 attention landscape:**
+
+```bash
+python3 scripts/arxiv_research.py lookup --ids 1706.03762
+python3 scripts/arxiv_research.py search \
+  -q 'all:attention+AND+submittedDate:[201701010000+TO+201712312359]+AND+cat:cs.CL' \
+  --max-results 30 --sort submittedDate
+python3 scripts/arxiv_research.py snowball --ids 1706.03762 --years-back 1 --max-results 15
+```

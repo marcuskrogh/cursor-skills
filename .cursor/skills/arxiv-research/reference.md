@@ -2,13 +2,134 @@
 
 Official docs: https://info.arxiv.org/help/api/user-manual.html
 
-## Endpoint
+## Primary tool: `scripts/arxiv_research.py`
+
+Stdlib Python script — no MCP, no extra dependencies. Always prefer this over raw `curl`.
+
+### Commands
+
+| Command | Purpose |
+|---------|---------|
+| `search` | One or more `-q` queries; merges and deduplicates |
+| `lookup` | Fetch metadata by arXiv ID (`--ids`) |
+| `snowball` | Expand from seed IDs via author/category follow-ups |
+
+### Examples
+
+```bash
+# Multi-query search (one invocation)
+python3 scripts/arxiv_research.py search \
+  -q 'all:transformer AND cat:cs.LG' \
+  -q 'ti:"attention is all you need"' \
+  --max-results 50 \
+  --sort submittedDate \
+  --order descending
+
+# Known paper lookup
+python3 scripts/arxiv_research.py lookup --ids 1706.03762,hep-th/9711200
+
+# Snowball from seeds
+python3 scripts/arxiv_research.py snowball \
+  --ids 1706.03762 \
+  --max-results 20 \
+  --years-back 3
+
+# Pagination
+python3 scripts/arxiv_research.py search -q 'all:topic' --max-results 50 --start 50
+
+# Fetch all pages (slow; rate-limited)
+python3 scripts/arxiv_research.py search -q 'all:topic' --paginate --max-results 100
+```
+
+### Flags
+
+| Flag | Applies to | Default | Description |
+|------|-----------|---------|-------------|
+| `-q` / `--query` | search | — | Search expression (repeatable) |
+| `--ids` | lookup, snowball | — | Comma-separated arXiv IDs |
+| `--max-results` | all | 25 | Page size (max 200) |
+| `--sort` | search | relevance | `relevance`, `submittedDate`, `lastUpdatedDate` |
+| `--order` | search | descending | `ascending`, `descending` |
+| `--start` | search | 0 | Pagination offset |
+| `--paginate` | search | off | Fetch all pages per query |
+| `--years-back` | snowball | 3 | Date window for follow-ups |
+| `--max-authors` | snowball | 3 | Top authors to expand |
+| `--max-categories` | snowball | 2 | Top categories to expand |
+| `--compact` | all | off | Compact JSON output |
+
+### JSON output schema
+
+**`search` mode:**
+
+```json
+{
+  "mode": "search",
+  "queries": [
+    { "search_query": "...", "total_results": 1234, "fetched": 25 }
+  ],
+  "unique_papers": 42,
+  "papers": [ { "...paper fields..." } ]
+}
+```
+
+**`lookup` mode:**
+
+```json
+{
+  "mode": "lookup",
+  "id_list": "1706.03762",
+  "total_results": 1,
+  "papers": [ { "...paper fields..." } ]
+}
+```
+
+**`snowball` mode:**
+
+```json
+{
+  "mode": "snowball",
+  "seed_ids": ["1706.03762"],
+  "seed_papers": [ { "..." } ],
+  "follow_up_queries": ["au:vaswani+AND+..."],
+  "top_authors": ["vaswani"],
+  "top_categories": ["cs.CL", "cs.LG"],
+  "unique_papers": 18,
+  "papers": [ { "..." } ]
+}
+```
+
+**Paper object fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `arxiv_id` | string | Canonical ID without version |
+| `version` | int \| null | Version number |
+| `canonical_id_with_version` | string | e.g. `1706.03762v7` |
+| `title` | string | Paper title |
+| `authors` | string[] | Author names (ordered) |
+| `abstract` | string | Abstract text |
+| `submitted_date` | string | ISO 8601 v1 submission |
+| `updated_date` | string | ISO 8601 latest update |
+| `primary_category` | string | e.g. `cs.LG` |
+| `categories` | string[] | All categories |
+| `comment` | string \| null | Author comments |
+| `journal_ref` | string \| null | Journal reference |
+| `doi` | string \| null | DOI if set |
+| `abs_url` | string | Abstract page URL |
+| `pdf_url` | string | PDF URL |
+| `source_queries` | string[] | Which search queries returned this paper |
+
+## Raw API (fallback only)
 
 ```
 https://export.arxiv.org/api/query
 ```
 
-Always use **HTTPS**. No authentication. Response format: Atom 1.0 XML.
+Use when Python is unavailable:
+
+```bash
+curl -sL "https://export.arxiv.org/api/query?search_query=all:topic&max_results=25"
+```
 
 ## Query parameters
 
@@ -16,12 +137,10 @@ Always use **HTTPS**. No authentication. Response format: Atom 1.0 XML.
 |-----------|------|---------|---------|
 | `search_query` | string | — | Boolean search expression |
 | `id_list` | CSV | — | One or more arXiv IDs |
-| `start` | int | 0 | 0-based offset for pagination |
-| `max_results` | int | 10 | Page size (server max 2000; use ≤50 in agent workflows) |
+| `start` | int | 0 | 0-based offset |
+| `max_results` | int | 10 | Page size (server max 2000) |
 | `sortBy` | enum | relevance | `relevance`, `submittedDate`, `lastUpdatedDate` |
 | `sortOrder` | enum | descending | `ascending`, `descending` |
-
-`search_query` and `id_list` can be combined; the API returns IDs that match the query filter.
 
 ## Field prefixes (`search_query`)
 
@@ -35,13 +154,12 @@ Always use **HTTPS**. No authentication. Response format: Atom 1.0 XML.
 | Journal ref | `jr:` | `jr:"Nature"` |
 | Report number | `rn:` | `rn:CERN-PH-TH` |
 | Category | `cat:` | `cat:cs.LG` |
-| arXiv ID | `id:` | prefer `id_list=` instead |
 
 ## Boolean operators
 
-- `AND`, `OR`, `ANDNOT` — join with `+` in URLs: `all:transformer+AND+cat:cs.LG`
-- Group with parentheses (URL-encode): `%28cat:cs.LG+OR+cat:cs.AI%29`
-- Phrases: wrap in `%22...%22` (URL-encoded double quotes)
+- `AND`, `OR`, `ANDNOT` — join with `+`: `all:transformer+AND+cat:cs.LG`
+- Group: `%28cat:cs.LG+OR+cat:cs.AI%29`
+- Phrases: `%22...%22`
 
 ## Date ranges
 
@@ -52,86 +170,19 @@ lastUpdatedDate:[YYYYMMDDHHMM TO YYYYMMDDHHMM]
 
 URL-encode brackets as `%5B` and `%5D`.
 
-Example (papers submitted in 2024):
-
-```
-submittedDate:%5B202401010000+TO+202412312359%5D
-```
-
 ## arXiv ID formats
 
 - **New style:** `YYMM.NNNNN` (e.g. `1706.03762`)
-- **Old style:** `archive/YYMMNNN` (e.g. `hep-th/9711200`) — no subcategory dot
-- **Version pin:** append `vN` to `id_list` (e.g. `1706.03762v1`)
-
-## Atom XML fields per `<entry>`
-
-| Path | Maps to |
-|------|---------|
-| `entry/id` | Abs URL with version; strip `vN` for canonical ID |
-| `entry/title` | Title (trim whitespace) |
-| `entry/summary` | Abstract (trim whitespace) |
-| `entry/published` | v1 submission (ISO 8601) |
-| `entry/updated` | Latest version update |
-| `entry/author/name` | Author names (preserve order) |
-| `entry/arxiv:primary_category[@term]` | Primary category |
-| `entry/category[@term]` | All categories |
-| `entry/arxiv:comment` | Comments (optional) |
-| `entry/arxiv:journal_ref` | Journal reference (optional) |
-| `entry/arxiv:doi` | DOI (optional) |
-| `entry/link[@rel="alternate"]` | Abstract page |
-| `entry/link[@rel="related" @type="application/pdf"]` | PDF URL |
-
-Feed-level:
-
-| Path | Maps to |
-|------|---------|
-| `feed/opensearch:totalResults` | Total hits for query |
-| `feed/opensearch:startIndex` | Current offset |
-| `feed/opensearch:itemsPerPage` | Page size |
+- **Old style:** `archive/YYMMNNN` (e.g. `hep-th/9711200`)
+- **Version pin:** append `vN` to `id_list`
 
 ## Rate limiting
 
-arXiv requests **≤ 1 request per 3 seconds** sustained. Sleep 3 seconds between API calls in loops.
+The script enforces **≥ 3 seconds** between API requests. Do not bypass with parallel raw `curl` calls.
 
-## Example URLs
+## API limitations (HTML fallback)
 
-**Broad topic + category, newest first:**
-
-```
-https://export.arxiv.org/api/query?search_query=all:retrieval+augmented+generation+AND+cat:cs.CL&start=0&max_results=25&sortBy=submittedDate&sortOrder=descending
-```
-
-**Known paper lookup:**
-
-```
-https://export.arxiv.org/api/query?id_list=1706.03762&max_results=1
-```
-
-**Author + recent window:**
-
-```
-https://export.arxiv.org/api/query?search_query=au:hinton+AND+submittedDate:%5B202301010000+TO+202512312359%5D&max_results=20&sortBy=submittedDate&sortOrder=descending
-```
-
-## Shell fetch pattern
-
-```bash
-curl -sL "https://export.arxiv.org/api/query?search_query=all:topic&max_results=25"
-```
-
-`-sL` follows redirects and suppresses progress noise.
-
-## API limitations (use WebFetch fallback)
-
-These dimensions are **not** searchable via the Atom API:
-
-- DOI lookup
-- ORCID lookup
-- ACM / MSC classification field search
-- "Cross-listed only" filter
-
-For those, open `https://arxiv.org/search/...` with WebFetch, extract IDs, then re-fetch metadata via `id_list=`.
+Not searchable via Atom API: DOI, ORCID, ACM/MSC field search, cross-listed-only filter. Use `arxiv.org/search` via WebFetch, extract IDs, then `lookup --ids`.
 
 ## Common categories
 
@@ -141,10 +192,8 @@ For those, open `https://arxiv.org/search/...` with WebFetch, extract IDs, then 
 | `cs.CL` | Computation and language |
 | `cs.CV` | Computer vision |
 | `cs.AI` | Artificial intelligence |
-| `cs.RO` | Robotics |
 | `stat.ML` | Machine learning (statistics) |
 | `math.OC` | Optimization and control |
-| `physics.comp-ph` | Computational physics |
 | `q-bio` | Quantitative biology |
 
 Full list: https://arxiv.org/category_taxonomy
