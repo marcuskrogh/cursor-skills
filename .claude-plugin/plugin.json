@@ -1,0 +1,33 @@
+{
+  "name": "marcus-skills",
+  "version": "1.0.0",
+  "description": "Marcus Krogh's agent skills for alignment, design, modelling, implementation, and code review — installable as a Claude Code plugin.",
+  "author": {
+    "name": "Marcus Krogh",
+    "url": "https://github.com/marcuskrogh"
+  },
+  "homepage": "https://github.com/marcuskrogh/cursor-skills",
+  "repository": "https://github.com/marcuskrogh/cursor-skills",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "skills",
+    "alignment",
+    "design",
+    "jira",
+    "code-review",
+    "implementation"
+  ],
+  "skills": [
+    "./skills/alignment",
+    "./skills/arxiv-research",
+    "./skills/code-review",
+    "./skills/design",
+    "./skills/explore",
+    "./skills/implement",
+    "./skills/implementation",
+    "./skills/jira",
+    "./skills/manage-skills",
+    "./skills/model"
+  ]
+}

@@ -1,7 +1,14 @@
-# Install skills from this repo into a project's .cursor/skills/ directory.
+# Install skills from this repo into a project's agent skill directories.
+# Prefer: npx skills add marcuskrogh/cursor-skills
+#
 # Usage:
 #   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo
-#   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -Skill grill-me -Submodule
+#   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -Skill explore,design
+#   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -Target agents
+#
+# -Target agents  → .agents/skills/ (Cursor / Copilot / Codex project default)
+# -Target cursor  → .cursor/skills/ (legacy Cursor project path)
+# -Target both    → both (default)
 
 param(
     [Parameter(Mandatory = $true)]
@@ -9,7 +16,8 @@ param(
 
     [string[]]$Skill = @(),
 
-    [switch]$Submodule,
+    [ValidateSet("agents", "cursor", "both")]
+    [string]$Target = "both",
 
     [switch]$All
 )
@@ -17,39 +25,33 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
-$SourceDir = Join-Path $RepoRoot ".cursor\skills"
+$SourceDir = Join-Path $RepoRoot "skills"
 
 if (-not (Test-Path -LiteralPath $ProjectPath)) {
     Write-Error "Project path not found: $ProjectPath"
 }
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
-$TargetDir = Join-Path $ProjectPath ".cursor\skills"
 
 if (-not (Test-Path $SourceDir)) {
     Write-Error "Source directory not found: $SourceDir"
 }
 
-if ($Submodule) {
-    Push-Location $ProjectPath
-    try {
-        $relativeRepo = (Resolve-Path $RepoRoot -Relative).Replace('\', '/')
-        if (Test-Path ".cursor\skills") {
-            Write-Warning ".cursor\skills already exists. Remove it before adding submodule."
-            exit 1
-        }
-        New-Item -ItemType Directory -Force -Path ".cursor" | Out-Null
-        git submodule add $relativeRepo ".cursor/skills"
-        Write-Host "Added git submodule at .cursor/skills"
-        Write-Host "Cloud agents and collaborators will receive skills when they clone with --recurse-submodules"
-    } finally {
-        Pop-Location
+$targetDirs = @()
+switch ($Target) {
+    "agents" { $targetDirs = @((Join-Path $ProjectPath ".agents\skills")) }
+    "cursor" { $targetDirs = @((Join-Path $ProjectPath ".cursor\skills")) }
+    "both" {
+        $targetDirs = @(
+            (Join-Path $ProjectPath ".agents\skills"),
+            (Join-Path $ProjectPath ".cursor\skills")
+        )
     }
-    exit 0
 }
 
-New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
+$available = Get-ChildItem -Path $SourceDir -Directory | Where-Object {
+    Test-Path (Join-Path $_.FullName "SKILL.md")
+}
 
-$available = Get-ChildItem -Path $SourceDir -Directory
 if ($All -or $Skill.Count -eq 0) {
     $toInstall = $available
 } else {
@@ -60,15 +62,22 @@ if ($All -or $Skill.Count -eq 0) {
     }
 }
 
-foreach ($skill in $toInstall) {
-    $dest = Join-Path $TargetDir $skill.Name
-    if (Test-Path $dest) {
-        Remove-Item $dest -Recurse -Force
+foreach ($TargetDir in $targetDirs) {
+    New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
+
+    foreach ($skill in $toInstall) {
+        $dest = Join-Path $TargetDir $skill.Name
+        if (Test-Path $dest) {
+            Remove-Item $dest -Recurse -Force
+        }
+        Copy-Item -Path $skill.FullName -Destination $dest -Recurse -Force
+        Write-Host "Installed to $($TargetDir): $($skill.Name)"
     }
-    Copy-Item -Path $skill.FullName -Destination $dest -Recurse -Force
-    Write-Host "Installed to project: $($skill.Name)"
+
+    Write-Host "Installed $($toInstall.Count) skill(s) to $TargetDir"
 }
 
 Write-Host ""
-Write-Host "Installed $($toInstall.Count) skill(s) to $TargetDir"
-Write-Host "Commit .cursor/skills/ to share with cloud agents and your team."
+Write-Host "Prefer the universal installer when possible:"
+Write-Host "  npx skills add marcuskrogh/cursor-skills"
+Write-Host "Commit .agents/skills/ (and/or .cursor/skills/) to share with cloud agents and your team."

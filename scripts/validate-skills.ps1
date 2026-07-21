@@ -4,8 +4,12 @@
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$SkillsDir = Join-Path $RepoRoot ".cursor\skills"
+$SkillsDir = Join-Path $RepoRoot "skills"
 $errors = 0
+
+if (-not (Test-Path $SkillsDir)) {
+    Write-Error "Skills directory not found: $SkillsDir"
+}
 
 function Test-SkillFrontmatter {
     param([string]$Path)
@@ -55,6 +59,31 @@ Get-ChildItem -Path $SkillsDir -Recurse -Filter "SKILL.md" | ForEach-Object {
     if (-not (Test-SkillFrontmatter -Path $_.FullName)) {
         $script:errors++
     }
+}
+
+$pluginJson = Join-Path $RepoRoot ".claude-plugin\plugin.json"
+if (Test-Path $pluginJson) {
+    $plugin = Get-Content $pluginJson -Raw | ConvertFrom-Json
+    $declared = @($plugin.skills)
+    $onDisk = Get-ChildItem -Path $SkillsDir -Directory | Where-Object {
+        Test-Path (Join-Path $_.FullName "SKILL.md")
+    } | ForEach-Object { "./skills/$($_.Name)" }
+
+    foreach ($path in $declared) {
+        $abs = Join-Path $RepoRoot ($path -replace '^\./', '' -replace '/', '\')
+        if (-not (Test-Path (Join-Path $abs "SKILL.md"))) {
+            Write-Host "FAIL: plugin.json declares missing skill: $path"
+            $script:errors++
+        }
+    }
+
+    foreach ($path in $onDisk) {
+        if ($path -notin $declared) {
+            Write-Host "WARN: skill on disk not declared in plugin.json: $path"
+        }
+    }
+} else {
+    Write-Host "WARN: .claude-plugin/plugin.json missing"
 }
 
 if ($errors -gt 0) {

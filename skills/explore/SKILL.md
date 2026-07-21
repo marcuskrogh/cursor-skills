@@ -8,9 +8,9 @@ description: >-
 
 # Explore
 
-Applies [alignment](../base/alignment/SKILL.md) at **project or feature scale**. Produces `ROADMAP.md` and Jira issues.
+Applies [alignment](../alignment/SKILL.md) at **project or feature scale**. Produces `ROADMAP.md` and Jira issues.
 
-**On invoke:** read [../base/alignment/SKILL.md](../base/alignment/SKILL.md) and [../jira/reference.md](../jira/reference.md).
+**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md) and [../jira/reference.md](../jira/reference.md).
 
 ## Extension contract
 

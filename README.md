@@ -1,173 +1,128 @@
 # cursor-skills
 
-Personal Cursor Agent Skills — one git repo, available everywhere.
+Personal agent skills for real engineering workflows — alignment, design, modelling, implementation, and review.
 
-## The problem
+Works with **Cursor**, **Claude Code**, **Codex**, **GitHub Copilot**, and any harness that speaks the [Agent Skills](https://agentskills.io) standard.
 
-| Location | Local IDE | Cloud agents | Cursor App |
-|----------|-----------|--------------|------------|
-| `~/.cursor/skills/` | Yes | No | No |
-| `.cursor/skills/` in a repo | Yes (that repo) | Yes | Yes (if repo linked) |
-| GitHub remote install | Yes | Yes | Yes |
+[![skills.sh](https://skills.sh/b/marcuskrogh/cursor-skills)](https://skills.sh/marcuskrogh/cursor-skills)
 
-Skills edited only in `~/.cursor/skills/` stay on one machine. This repo fixes that.
+## Quickstart (recommended)
 
-## Quick start (this machine)
+Install via [skills.sh](https://skills.sh) — pick skills and which coding agents to target:
+
+```bash
+npx skills add marcuskrogh/cursor-skills
+```
+
+This copies skills into each agent's project (or global) skill directory. Relative links between skills stay intact because they install as siblings.
+
+## Install as a Claude Code plugin
+
+Prefer a managed, auto-updating bundle instead of editable copies?
+
+Inside Claude Code:
+
+```
+/plugin marketplace add marcuskrogh/cursor-skills
+/plugin install marcus-skills@marcuskrogh
+```
+
+Or from your shell:
+
+```bash
+claude plugin marketplace add marcuskrogh/cursor-skills
+claude plugin install marcus-skills@marcuskrogh
+```
+
+Two install philosophies:
+
+- **[skills.sh](https://skills.sh/marcuskrogh/cursor-skills)** — editable copies in your project; hack on them.
+- **Claude plugin** — read-only bundle that updates when this repo ships new versions.
+
+## Author / local machine (this repo)
+
+If you clone this repo to author skills:
 
 ```powershell
 .\scripts\setup-cursor.ps1
 ```
 
-This validates skills, syncs to `~/.cursor/skills/`, and installs git hooks so `git pull` keeps your local IDE in sync.
+Validates skills, syncs into local global dirs (`~/.cursor/skills`, `~/.agents/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.copilot/skills`), and installs git hooks so `git pull` re-syncs.
 
-## Quick start (manual)
+## Cloud agents (Cursor)
+
+Bootstrap a project so cloud VMs pull skills at startup:
 
 ```powershell
-.\scripts\sync-local.ps1 -Prune
-.\scripts\validate-skills.ps1
+.\scripts\setup-cloud-agent.ps1 -ProjectPath C:\path\to\repo
 ```
+
+Writes `.cursor/sync-cursor-skills.sh` + `.cursor/environment.json`, and gitignores synced skill dirs. Skills land in both `.agents/skills/` and `.cursor/skills/`.
 
 ## Architecture
 
 ```
-cursor-skills/                 ← git source of truth
-└── .cursor/skills/
-    ├── base/                  ← design specs (never user-invoked)
-    │   ├── alignment/
-    │   └── implementation/
-    ├── explore/               ├─ alignment-derived
-    ├── design/                │
-    ├── model/                 │
-    ├── implement/             └─ implementation-derived
-    ├── arxiv-research/
-    ├── code-review/
-    └── manage-skills/
-
-~/.cursor/skills/              ← local mirror (sync script)
-<project>/.cursor/skills/      ← per-repo copy or submodule (cloud)
-GitHub remote rule             ← Cursor App / other machines
+cursor-skills/                      ← git source of truth
+├── skills/                         ← Agent Skills standard (edit here)
+│   ├── explore/                    ← project/feature alignment → ROADMAP.md
+│   ├── design/                     ← topic alignment → PLAN.md
+│   ├── model/                      ← mathematical alignment → MODEL.md
+│   ├── implement/                  ← managed implementation from a Jira ticket
+│   ├── code-review/                ← Standards + Spec review
+│   ├── arxiv-research/             ← literature review via arXiv
+│   ├── alignment/                  ← base (composed, not user-invoked)
+│   ├── implementation/             ← base (composed, not user-invoked)
+│   ├── jira/                       ← shared Jira reference
+│   └── manage-skills/              ← meta: maintain this repo
+├── .claude-plugin/                 ← Claude Code marketplace + plugin manifests
+├── scripts/                        ← validate / sync / cloud bootstrap
+└── templates/cloud-agent/          ← cloud VM sync script
 ```
 
-## Skill model
+## Skills
 
-### Base skills (design specifications)
+| Skill | Invoke | Purpose |
+|-------|--------|---------|
+| **explore** | user | High-level alignment → `ROADMAP.md` + Jira Story/Tasks |
+| **design** | user | Topic alignment → `PLAN.md` + Jira Task/Sub-tasks |
+| **model** | user | Mathematical alignment → `MODEL.md` + Jira Task |
+| **implement** | user | Build from a Jira ticket via managed sub-agents |
+| **code-review** | user | Two-axis PR review (Standards + Spec) + Jira comment |
+| **arxiv-research** | user | arXiv literature review brief |
+| **manage-skills** | user | Maintain and sync this repository |
+| **alignment** | composed | Base questioning loop |
+| **implementation** | composed | Base manager/sub-agent loop |
+| **jira** | composed | Shared Jira REST reference |
 
-Under `.cursor/skills/base/`. Define *how* an interaction works. `disable-model-invocation: true` — users almost never invoke these directly; derived skills compose them.
+## Workflow for skill changes
 
-| Base | Purpose |
-|------|---------|
-| **alignment** | Fundamental agreement via relentless one-question adaptive clarification |
-| **implementation** | Management-agent delegation against an agreed specification |
-
-### Derived skills (user-invoked)
-
-Each skill stands alone. On invoke, read the relevant base skill, fill the extension contract, produce an artifact or deliver. Skills do not chain or reference other skills — combined workflows will be defined separately later.
-
-| Skill | Base | Output | Jira |
-|-------|------|--------|------|
-| **explore** | alignment | `ROADMAP.md` | Story + Tasks |
-| **design** | alignment | `PLAN.md` | Task + Sub-tasks |
-| **model** | alignment (+ LaTeX format) | `MODEL.md` | Task + attachment |
-| **implement** | implementation | PR or feature branch | In Progress → In Review |
-| **code-review** | — | PR review | Requires In Review ticket |
-
-Jira API reference: [`.cursor/skills/jira/reference.md`](.cursor/skills/jira/reference.md). Requires `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, and usually `JIRA_PROJECT_KEY`.
-
-### Workflows (future)
-
-Multi-skill sequences (e.g. explore then design) are **not** encoded in skills. A separate workflow format will be added later for combining skills when needed.
-
-### Legacy skill mapping
-
-| Removed | Standalone replacement |
-|---------|------------------------|
-| `grill-me` | `design` and/or `implement` (separate invocations) |
-| `grill-me-and-develop` | `design` and/or `implement` |
-| `maths-grill-and-develop` | `model` and/or `implement` |
-| `align` (base) | `alignment` (base) |
-
-## Making skills global
-
-### 1. Local IDE (all projects on this machine)
-
-```powershell
-.\scripts\sync-local.ps1 -Prune
-```
-
-Use `-Link` instead of copy if you have Windows Developer Mode enabled and want live edits.
-
-### 2. Cloud agents
-
-Cloud agents clone the project repo — they never see `~/.cursor/skills/`.
-
-**Per project:** install skills into the project and commit:
-
-```powershell
-.\scripts\install-to-project.ps1 -ProjectPath C:\path\to\your-repo -All
-```
-
-**Shared across projects:** push this repo to GitHub and add it as a remote rule (see below), or use a git submodule.
-
-### 3. Cursor App and other machines
-
-1. Push this repo to GitHub (public or private).
-2. In Cursor: **Customize → Rules → Add Rule → Remote Rule (Github)**.
-3. Enter your repo URL.
-
-Skills load without manual sync on that device.
-
-### 4. New skill workflow
-
-1. Add `.cursor/skills/<name>/SKILL.md` (base designs under `.cursor/skills/base/<name>/`).
+1. Edit `skills/<name>/` **in this repo**.
 2. `.\scripts\validate-skills.ps1`
-3. `.\scripts\sync-local.ps1 -Prune`
-4. `git add` / `git commit` / `git push`
+3. `.\scripts\sync-local.ps1 -Prune` (or rely on the post-merge hook after `git pull`)
+4. `git commit` / `git push`
 
-Use `/manage-skills` in Agent chat for the full checklist.
+Use `/manage-skills` for the full checklist.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `setup-cursor.ps1` | **Start here** — validate, sync local, install git hooks |
-| `sync-local.ps1` / `sync-local.sh` | Copy or link skills to `~/.cursor/skills/` |
-| `install-to-project.ps1` | Copy skills or add submodule to a project |
-| `validate-skills.ps1` | Check frontmatter and naming |
-| `arxiv_research.py` | arXiv search/lookup/snowball helper (stdlib, MCP-free) |
+| `setup-cursor.ps1` | Local author setup — validate, sync globals, git hooks |
+| `sync-local.ps1` / `sync-local.sh` | Mirror `skills/` into local global agent dirs |
+| `install-to-project.ps1` | Copy skills into a project's `.agents/skills` / `.cursor/skills` |
+| `validate-skills.ps1` | Frontmatter, naming, plugin.json coverage |
+| `setup-cloud-agent.ps1` | Wire cloud VM skill sync into a project |
 | `setup-github.ps1` | First-time push to GitHub |
 
-## Current skills
+## Requirements for Jira-backed skills
 
-### Base (design specs)
+`explore`, `design`, `model`, `implement`, and `code-review` expect:
 
-- **alignment** — One-question adaptive alignment until fundamental agreement
-- **implementation** — Management-agent work-package delegation against a spec
+| Variable | Purpose |
+|----------|---------|
+| `JIRA_BASE_URL` | e.g. `https://your-org.atlassian.net` |
+| `JIRA_EMAIL` | API user email |
+| `JIRA_API_TOKEN` | Atlassian API token |
+| `JIRA_PROJECT_KEY` | Default project key |
 
-### Derived (user-invoked)
-
-- **explore** — High-level roadmap + Jira Story/Tasks
-- **design** — Component design → `PLAN.md` + Jira Task/Sub-tasks
-- **model** — Mathematical spec → `MODEL.md` + Jira Task
-- **implement** — Managed implementation tracked in Jira
-- **code-review** — PR review tied to In Review Jira ticket
-- **arxiv-research** — Topic investigation via arXiv Atom API
-- **code-review** — Two-axis GitHub PR review (Standards + Spec)
-- **manage-skills** — This repo's maintenance workflow
-
-## Remote install (Cursor App + other machines)
-
-Repo: [github.com/marcuskrogh/cursor-skills](https://github.com/marcuskrogh/cursor-skills)
-
-1. Open **Customize** in the Cursor sidebar.
-2. Go to **Rules** → **Add Rule** → **Remote Rule (Github)**.
-3. Enter: `https://github.com/marcuskrogh/cursor-skills`
-
-Skills load on that device without running the sync script.
-
-## First-time GitHub push
-
-If you need to push a fresh clone:
-
-```powershell
-.\scripts\setup-github.ps1
-```
+`code-review` also needs an authenticated `gh` CLI.

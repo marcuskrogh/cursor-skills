@@ -116,4 +116,4 @@ Each delegation must include:
 
 1. Instruct the agent to **read this file first** on invoke.
 2. Fill in the **extension contract**.
-3. Link: `[implementation](../base/implementation/SKILL.md)`.
+3. Link: `[implementation](../implementation/SKILL.md)`.

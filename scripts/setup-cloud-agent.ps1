@@ -1,6 +1,9 @@
-# Add cloud agent skill sync to a project (Option 1).
+# Add cloud agent skill sync to a project.
 # Commits small bootstrap files; skills are fetched from GitHub at cloud VM startup.
 # Usage: .\scripts\setup-cloud-agent.ps1 -ProjectPath D:\code\MyRepo
+#
+# For interactive local/project installs across agents, prefer:
+#   npx skills add marcuskrogh/cursor-skills
 
 param(
     [Parameter(Mandatory = $true)]
@@ -47,16 +50,29 @@ if (Test-Path $envJson) {
 
 if (-not $SkipGitignore) {
     $gitignore = Join-Path $ProjectPath ".gitignore"
-    $entry = "`n# Synced from cursor-skills at cloud agent startup — do not commit`n.cursor/skills/"
+    $entries = @(
+        "",
+        "# Synced from cursor-skills at cloud agent startup — do not commit",
+        ".cursor/skills/",
+        ".agents/skills/"
+    )
     if (Test-Path $gitignore) {
         $existing = Get-Content $gitignore -Raw
-        if ($existing -notmatch '\.cursor/skills/') {
-            Add-Content -Path $gitignore -Value $entry
+        $toAdd = @()
+        if ($existing -notmatch '\.cursor/skills/') { $toAdd += ".cursor/skills/" }
+        if ($existing -notmatch '\.agents/skills/') { $toAdd += ".agents/skills/" }
+        if ($toAdd.Count -gt 0) {
+            Add-Content -Path $gitignore -Value ""
+            Add-Content -Path $gitignore -Value "# Synced from cursor-skills at cloud agent startup — do not commit"
+            foreach ($e in $toAdd) { Add-Content -Path $gitignore -Value $e }
         }
     } else {
-        Set-Content -Path $gitignore -Value $entry.TrimStart()
+        Set-Content -Path $gitignore -Value (($entries | Select-Object -Skip 1) -join "`n")
     }
 }
 
 Write-Host "Cloud agent skill sync installed at $cursorDir"
 Write-Host "Commit .cursor/sync-cursor-skills.sh, .cursor/environment.json, and .gitignore"
+Write-Host ""
+Write-Host "Also available via skills.sh:"
+Write-Host "  npx skills add marcuskrogh/cursor-skills"

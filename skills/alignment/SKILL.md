@@ -110,4 +110,4 @@ State overrides in the derived skill. See `model` for a full format override exa
 
 1. Instruct the agent to **read this file first** on invoke.
 2. Fill in the **extension contract**.
-3. Link: `[alignment](../base/alignment/SKILL.md)`.
+3. Link: `[alignment](../alignment/SKILL.md)`.

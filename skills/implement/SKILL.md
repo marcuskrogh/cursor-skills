@@ -8,9 +8,9 @@ description: >-
 
 # Implement
 
-Applies [implementation](../base/implementation/SKILL.md) to the **current repository**, tracked in **Jira**.
+Applies [implementation](../implementation/SKILL.md) to the **current repository**, tracked in **Jira**.
 
-**On invoke:** read [../base/implementation/SKILL.md](../base/implementation/SKILL.md) and [../jira/reference.md](../jira/reference.md).
+**On invoke:** read [../implementation/SKILL.md](../implementation/SKILL.md) and [../jira/reference.md](../jira/reference.md).
 
 ## Extension contract
 

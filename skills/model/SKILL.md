@@ -8,9 +8,9 @@ description: >-
 
 # Model
 
-Applies [alignment](../base/alignment/SKILL.md) to **applied mathematical** topics. Produces `MODEL.md` in the repo and a Jira Task.
+Applies [alignment](../alignment/SKILL.md) to **applied mathematical** topics. Produces `MODEL.md` in the repo and a Jira Task.
 
-**On invoke:** read [../base/alignment/SKILL.md](../base/alignment/SKILL.md), [format.md](format.md), [reference.md](reference.md), and [../jira/reference.md](../jira/reference.md).
+**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md), [format.md](format.md), [reference.md](reference.md), and [../jira/reference.md](../jira/reference.md).
 
 ## Extension contract
 
