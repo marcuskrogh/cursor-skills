@@ -104,7 +104,7 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | **model** | user | Math alignment → `MODEL.md` (updates Task continuity) |
 | **design** | user | Topic alignment → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a pipeline Task via managed sub-agents |
-| **review** | user | One-shot Standards + Spec PR review |
+| **review** | user | Thorough multi-axis PR review (Spec, Correctness, Integration, Standards) |
 | **review-fix** | user | Review ↔ auto fix-forward until clean → ship |
 | **ship** | user | Merge PR, mark Task Done, close the phase |
 | **summarise** | user | About / workflow stage / what to run Next |
