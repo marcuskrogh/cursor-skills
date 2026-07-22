@@ -1,14 +1,14 @@
 ---
 name: ship
 description: >-
-  Close out a Jira Task after a successful code-review: confirm the PR is ready,
+  Close out a Jira Task after a successful review: confirm the PR is ready,
   merge (or record merge), transition the ticket to Done, and hand off nothing.
   Use when a ticket in In Review has a clean review and should be finished.
 ---
 
 # Ship
 
-Final step of the main pipeline after [code-review](../code-review/SKILL.md).
+Final step of the main pipeline after [review](../review/SKILL.md).
 Closes the **same Jira Task** that flowed through design → implement → review.
 
 **On invoke:** read [../workflow/reference.md](../workflow/reference.md) and
@@ -29,7 +29,7 @@ Requires authenticated `gh` and Jira credentials. If either is missing, stop and
 
 ### 1. Resolve the pull request
 
-Same order as code-review: Jira link → user-named PR → current branch PR.
+Same order as review: Jira link → user-named PR → current branch PR.
 
 Confirm:
 

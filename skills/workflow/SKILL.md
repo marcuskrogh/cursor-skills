@@ -1,7 +1,7 @@
 ---
 name: workflow
 description: >-
-  Shared main-pipeline contract for explore → design → implement → code-review → ship.
+  Shared main-pipeline contract for explore → design → implement → review → ship.
   Not for user invocation — composed by those skills for ticket continuity and handoffs.
 disable-model-invocation: true
 ---

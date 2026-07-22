@@ -3,7 +3,7 @@ name: implement
 description: >-
   Managed sub-agent implementation against a Jira Task (and Sub-tasks) from design.
   Moves the ticket In Progress then In Review when the PR is ready; supports
-  fix-forward after code-review. Use when building work defined by a pipeline ticket.
+  fix-forward after review. Use when building work defined by a pipeline ticket.
 ---
 
 # Implement
@@ -26,7 +26,7 @@ Applies [implementation](../implementation/SKILL.md) to the **current repository
 | Mode | When | Behavior |
 |------|------|----------|
 | **Build** (default) | Task is To Do / In Progress; plan + packages define work | Full implementation loop |
-| **Fix-forward** | After **code-review** with blocking findings; same Task + open PR | Address review threads only; no new scope |
+| **Fix-forward** | After **review** with blocking findings; same Task + open PR | Address review threads only; no new scope |
 
 Detect fix-forward when: user says so, or ticket is **In Review** / recently reviewed and the invoke mentions review findings / "address review".
 
@@ -97,7 +97,7 @@ After PR creation or update: transition parent to **In Review**; Jira comment wi
 
 ```markdown
 ## Next
-`/code-review <TASK-KEY>` — Standards + Spec review on the PR
+`/review <TASK-KEY>` — Standards + Spec review on the PR
 ```
 
 ## Flow
@@ -107,7 +107,7 @@ After PR creation or update: transition parent to **In Review**; Jira comment wi
 3. Delivery clarification (PR vs branch) — build mode
 4. Create or reuse branch
 5. Delegate work packages ↔ sub-tasks / review threads; update Jira as you go
-6. Verify → PR → **In Review** on parent → **Next** `/code-review`
+6. Verify → PR → **In Review** on parent → **Next** `/review`
 
 ## Examples
 
@@ -115,6 +115,6 @@ User: `/implement` SW-200
 
 Agent: [Fetches SW-200 and sub-tasks, loads PLAN.md, transitions to In Progress, asks PR vs branch]
 
-User: `/implement` SW-200 — address the code-review findings
+User: `/implement` SW-200 — address the review findings
 
 Agent: [Fix-forward: loads PR review threads, packages fixes, pushes, returns to In Review]

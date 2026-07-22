@@ -27,7 +27,7 @@ Use `curl` or `gh`-style shell; do not commit credentials.
 | `design` | **Same explore Task** (preferred) or new **Task** / **Story** if standalone | **Sub-task** per work package |
 | `model` | **Task** | — |
 | `implement` | Existing pipeline **Task** / **Story** | Existing **Sub-tasks** (or create if missing) |
-| `code-review` | Existing ticket in **In Review** | — |
+| `review` | Existing ticket in **In Review** | — |
 | `ship` | Existing ticket after clean review | — → **Done** |
 
 Adjust issue type names to match the Jira project schema if creation fails.
@@ -43,7 +43,7 @@ Skills use these logical states (match to project transitions by name):
 |-------|---------|
 | **To Do** / **Backlog** | New tickets from explore, design, model |
 | **In Progress** | `implement` at session start (and fix-forward) |
-| **In Review** | `implement` when PR is ready; required for `code-review` |
+| **In Review** | `implement` when PR is ready; required for `review` |
 | **Done** | `ship` after merge / confirmed closeout |
 
 Discover transitions:

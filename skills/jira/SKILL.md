@@ -2,7 +2,7 @@
 name: jira
 description: >-
   Shared Jira REST integration reference for explore, design, model, implement,
-  code-review, and ship. Not for user invocation — composed only by those skills
+  review, and ship. Not for user invocation — composed only by those skills
   when they create or update tickets.
 disable-model-invocation: true
 ---

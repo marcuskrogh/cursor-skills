@@ -5,7 +5,7 @@ Agent reference for the primary delivery pipeline. **Not a user-invoked skill.**
 ## Pipeline
 
 ```text
-explore  →  design  →  implement  →  code-review  →  ship
+explore  →  design  →  implement  →  review  →  ship
    │           │            │              │            │
  ROADMAP.md  PLAN.md     branch+PR      PR review     merge+Done
  Story+Tasks  same Task   same Task      same Task     same Task
@@ -23,7 +23,7 @@ explore  →  design  →  implement  →  code-review  →  ship
 | **explore** | Create **Story** + one **Task** per roadmap phase. Tasks are design-ready placeholders. |
 | **design** | Take an explore **Task**. Enrich *that* ticket (description, `PLAN.md`, Sub-tasks). Do **not** create a parallel design ticket when an explore Task is the subject. |
 | **implement** | Work the **same Task** (and its Sub-tasks). Branch + PR; move to **In Review**. |
-| **code-review** | Review the PR for that Task while it is **In Review**. |
+| **review** | Review the PR for that Task while it is **In Review**. |
 | **ship** | Merge (or confirm merge), transition Task to **Done**, close the loop on the Story. |
 
 ### Standalone entry
@@ -47,7 +47,7 @@ explore  →  design  →  implement  →  code-review  →  ship
 | `ROADMAP.md` | explore | Project/feature scope and phase list |
 | `PLAN.md` | design | Spec for implement + Spec-axis review |
 | Branch + PR | implement | Delivery vehicle |
-| PR review | code-review | Standards + Spec findings |
+| PR review | review | Standards + Spec findings |
 | Merge + Done | ship | Closeout |
 
 Prefer repo path conventions already used by the project (`docs/`, repo root, etc.).
@@ -66,9 +66,9 @@ Every pipeline skill **ends** by telling the user the next invoke, using this sh
 |-------|----------------|
 | explore | `/design <first-priority-Task>` |
 | design | `/implement <Task>` |
-| implement | `/code-review <Task>` |
-| code-review (blocking findings / `REQUEST_CHANGES`) | `/implement <Task>` (fix-forward) |
-| code-review (no blockers) | `/ship <Task>` |
+| implement | `/review <Task>` |
+| review (blocking findings / `REQUEST_CHANGES`) | `/implement <Task>` (fix-forward) |
+| review (no blockers) | `/ship <Task>` |
 | ship | Done — no next skill |
 
 Also write the **Next** line into the Jira comment for that session so the handoff
@@ -82,7 +82,7 @@ Before the first substantive action, load prior pipeline context when a ticket k
 |-------|------|
 | design | Task (+ parent Story), `ROADMAP.md` if present |
 | implement | Task + Sub-tasks, `PLAN.md` / linked specs |
-| code-review | Task + PR + `PLAN.md` / specs |
+| review | Task + PR + `PLAN.md` / specs |
 | ship | Task + PR + latest review outcome |
 
 ## Status chain
@@ -90,7 +90,7 @@ Before the first substantive action, load prior pipeline context when a ticket k
 ```text
 To Do / Backlog  →  In Progress  →  In Review  →  Done
      explore/design      implement        implement     ship
-                                         code-review
+                                         review
 ```
 
 | Skill | Status duty |
@@ -98,23 +98,23 @@ To Do / Backlog  →  In Progress  →  In Review  →  Done
 | explore / design | Leave new/enriched Tasks in **To Do** (or project default). |
 | implement | **In Progress** at start; **In Review** when PR is ready. |
 | implement (fix-forward) | May return briefly to **In Progress**, then **In Review** again. |
-| code-review | Requires **In Review**; does not transition to Done. |
+| review | Requires **In Review**; does not transition to Done. |
 | ship | **Done** on the Task after successful closeout. |
 
 ## Fix-forward
 
-When **code-review** leaves blocking findings:
+When **review** leaves blocking findings:
 
 1. Next skill is **implement** on the same Task (not a new ticket).
 2. Implement treats open PR review threads as the work packages.
 3. Do not invent new scope beyond the review + existing plan.
 4. Re-open or keep the PR; return Task to **In Review** when ready.
-5. User runs **code-review** again, then **ship**.
+5. User runs **review** again, then **ship**.
 
 ## Anti-patterns
 
 - Creating a second Task in design when an explore Task was provided
 - Ending a pipeline skill without a **Next** handoff
-- Marking **Done** from implement or code-review (that is **ship**)
+- Marking **Done** from implement or review (that is **ship**)
 - Implementing without a usable plan on non-trivial work
 - Skipping ticket keys in handoff lines ("Next: /implement" with no key)

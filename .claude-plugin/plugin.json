@@ -15,14 +15,14 @@
     "alignment",
     "design",
     "jira",
-    "code-review",
+    "review",
     "implementation",
     "workflow"
   ],
   "skills": [
     "./skills/alignment",
     "./skills/arxiv-research",
-    "./skills/code-review",
+    "./skills/review",
     "./skills/design",
     "./skills/explore",
     "./skills/implement",

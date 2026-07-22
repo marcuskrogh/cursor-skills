@@ -58,7 +58,7 @@ skills/                         ← source of truth (Agent Skills layout)
 ├── design/                     ← topic alignment → PLAN.md (enriches pipeline Task)
 ├── model/                      ← mathematical alignment → MODEL.md
 ├── implement/                  ← managed implementation from a Jira ticket
-├── code-review/                ← Standards + Spec review
+├── review/                ← Standards + Spec review
 ├── ship/                       ← merge + Done closeout
 ├── arxiv-research/             ← literature review via arXiv
 ├── alignment/                  ← base (composed, not user-invoked)
@@ -75,7 +75,7 @@ templates/project-sync/         ← startup sync script template
 ## Main pipeline
 
 ```text
-explore → design → implement → code-review → ship
+explore → design → implement → review → ship
 ```
 
 One Jira **Task** owns a phase from design through ship. See `skills/workflow/reference.md`.
@@ -85,7 +85,7 @@ One Jira **Task** owns a phase from design through ship. See `skills/workflow/re
 | **explore** | user | High-level alignment → `ROADMAP.md` + Jira Story/Tasks |
 | **design** | user | Topic alignment → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a Jira ticket via managed sub-agents |
-| **code-review** | user | Two-axis PR review (Standards + Spec) + Jira comment |
+| **review** | user | Two-axis PR review (Standards + Spec) + Jira comment |
 | **ship** | user | Merge PR, mark Task Done, close the phase |
 
 ## Other skills
@@ -122,7 +122,7 @@ Use `/manage-skills` for the full checklist.
 
 ## Requirements for Jira-backed skills
 
-`explore`, `design`, `model`, `implement`, `code-review`, and `ship` expect:
+`explore`, `design`, `model`, `implement`, `review`, and `ship` expect:
 
 | Variable | Purpose |
 |----------|---------|
@@ -131,4 +131,4 @@ Use `/manage-skills` for the full checklist.
 | `JIRA_API_TOKEN` | Atlassian API token |
 | `JIRA_PROJECT_KEY` | Default project key |
 
-`code-review` and `ship` also need an authenticated `gh` CLI.
+`review` and `ship` also need an authenticated `gh` CLI.

@@ -9,14 +9,14 @@
     {
       "name": "marcus-skills",
       "source": "./",
-      "description": "Explore/design/implement/code-review/ship pipeline with Jira tracking and two-axis review.",
+      "description": "Explore/design/implement/review/ship pipeline with Jira tracking and two-axis review.",
       "category": "engineering",
       "keywords": [
         "engineering",
         "skills",
         "alignment",
         "jira",
-        "code-review"
+        "review"
       ]
     }
   ]

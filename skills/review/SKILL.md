@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: review
 description: >-
   Two-axis GitHub PR review (Standards + Spec) tied to a Jira ticket in In Review
   on the main pipeline. Posts findings on the PR and Jira; hands off to implement
@@ -23,7 +23,7 @@ Requires `gh` CLI (authenticated) and Jira API credentials. If either is missing
 
 A code review is always tied to one Jira issue in **In Review** (or the project's equivalent).
 
-1. User provides ticket key or URL (e.g. `/code-review SW-200`, or link in message).
+1. User provides ticket key or URL (e.g. `/review SW-200`, or link in message).
 2. If missing, ask: "Which Jira ticket is in review?"
 3. Fetch the ticket per [../jira/reference.md](../jira/reference.md).
 4. Confirm status is **In Review** (or equivalent). If not, stop and tell the user to transition the ticket first.

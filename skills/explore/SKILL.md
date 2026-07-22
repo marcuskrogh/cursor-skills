@@ -3,7 +3,7 @@ name: explore
 description: >-
   High-level alignment on a project or feature idea. Produces a roadmap and a Jira Story
   with linked Tasks for later design sessions on the main pipeline
-  (explore → design → implement → code-review → ship). Use when the user wants to
+  (explore → design → implement → review → ship). Use when the user wants to
   explore scope, prioritise work, or clarify goals at project scale.
 ---
 
