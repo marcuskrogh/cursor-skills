@@ -50,9 +50,9 @@ Applies [implementation](../implementation/SKILL.md) to the **current repository
 | Start (build) | Task → **In Progress**; comment session start |
 | Each Sub-task started | that Sub-task → **In Progress** |
 | Sub-task package done | that Sub-task → **Done** + comment |
-| PR ready | Task → **In Review** + comment with PR URL + **Next** `/review` |
+| PR ready | Task → **In Review** + comment with PR URL + **Next** `/review-fix` |
 | Start (fix-forward) | Task → **In Progress** if needed; keep PR |
-| Fix-forward complete | Task → **In Review** + comment + **Next** `/review` |
+| Fix-forward complete | Task → **In Review** + comment + **Next** `/review-fix` (or `/review`) |
 
 Upsert ISSUES mirror on **every** transition/handoff. Do **not** mark the parent Task **Done** (that is **ship**).
 
@@ -92,12 +92,14 @@ Upsert ISSUES mirror on **every** transition/handoff. Do **not** mark the parent
 
 ```markdown
 ## Next
-`/review <TASK-KEY>` — Standards + Spec review on the PR
+`/review-fix <TASK-KEY>` — Review and auto-fix until clean
 ```
+
+(Use `/review <TASK-KEY>` for a one-shot review without auto-fix.)
 
 ## Flow
 
 1. Resolve issue + spec
 2. In Progress
 3. Branch + packages
-4. Verify → PR → In Review → **Next** `/review`
+4. Verify → PR → In Review → **Next** `/review-fix`

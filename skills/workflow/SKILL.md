@@ -1,10 +1,9 @@
 ---
 name: workflow
 description: >-
-  Shared pipeline contract for feature work (setup → explore → design → …) and
-  bug fixes (setup → bug → implement → review → ship), plus research/model side
-  paths and summarise. Markdown continuity and pluggable trackers. Not for user
-  invocation — composed by those skills.
+  Shared pipeline contract for feature work and bug fixes, including review-fix
+  loops, research/model side paths, and summarise. Markdown continuity and
+  pluggable trackers. Not for user invocation — composed by those skills.
 disable-model-invocation: true
 ---
 

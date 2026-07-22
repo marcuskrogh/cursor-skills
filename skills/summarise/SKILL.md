@@ -48,7 +48,8 @@ Pick the furthest stage that matches evidence:
 | **model** | `MODEL.md` linked; design not done |
 | **design** | Feature Task enriched but plan incomplete; or PLAN exists, not started |
 | **implement** | Status In Progress, or branch/PR WIP |
-| **review** | Status In Review; PR open |
+| **review** | Status In Review; PR open (one-shot) |
+| **review-fix** | Actively looping review↔fix, or preferred post-implement stage |
 | **fix-forward** | In Review/In Progress + open `REQUEST_CHANGES` / unreplied review threads |
 | **ship-ready** | In Review + latest review clean (no blockers) |
 | **done** | Status Done / PR merged |

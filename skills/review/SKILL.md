@@ -212,8 +212,10 @@ Do not paste the full review into chat.
 
 | Outcome | Next |
 |---------|------|
-| `REQUEST_CHANGES`, or any finding that should block merge | `/implement <KEY>` — Address review findings (fix-forward) |
+| `REQUEST_CHANGES`, or any finding that should block merge | `/implement <KEY>` — fix-forward — **or** `/review-fix <KEY>` to auto-loop |
 | `COMMENT` / `APPROVE` with no blocking findings | `/ship <KEY>` — Merge and mark Done |
+
+Prefer telling the user about `/review-fix` when blockers exist and they have not already declined automation.
 
 ```markdown
 ## Next

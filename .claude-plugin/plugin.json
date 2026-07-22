@@ -1,7 +1,7 @@
 {
   "name": "marcus-skills",
   "version": "1.0.0",
-  "description": "Agent skills for workspace setup, features, bugs, research, implementation, review, ship, and summarise (Agent Skills standard; also installable as a Claude Code plugin).",
+  "description": "Agent skills for workspace setup, features, bugs, research, implementation, review-fix, ship, and summarise (Agent Skills standard; also installable as a Claude Code plugin).",
   "author": {
     "name": "Marcus Krogh",
     "url": "https://github.com/marcuskrogh"
@@ -20,6 +20,7 @@
     "research",
     "jira",
     "review",
+    "review-fix",
     "implementation",
     "workflow"
   ],
@@ -35,6 +36,7 @@
     "./skills/model",
     "./skills/research",
     "./skills/review",
+    "./skills/review-fix",
     "./skills/setup",
     "./skills/ship",
     "./skills/summarise",

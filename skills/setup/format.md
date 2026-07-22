@@ -84,7 +84,7 @@ record the convention here.
 
 | Field | Value |
 |-------|-------|
-| Skills | explore → (research/model) → design → implement → review → ship; **or** bug → implement → review → ship (+ summarise) |
+| Skills | explore → (research/model) → design → implement → review-fix → ship; **or** bug → implement → review-fix → ship (+ summarise; `/review` = one-shot) |
 | One-issue continuity | true |
 | Tracker backend | resolved via provider above (`skills/tracker` when installed) |
 

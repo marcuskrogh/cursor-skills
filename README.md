@@ -61,7 +61,8 @@ skills/                         ← source of truth (Agent Skills layout)
 ├── model/                      ← mathematical alignment → MODEL.md
 ├── design/                     ← topic alignment → PLAN.md (enriches pipeline Task)
 ├── implement/                  ← managed implementation from a pipeline Task
-├── review/                     ← Standards + Spec review
+├── review/                     ← one-shot Standards + Spec review
+├── review-fix/                ← review ↔ fix-forward until clean
 ├── ship/                       ← merge + Done closeout
 ├── summarise/                  ← status: about / stage / Next
 ├── alignment/                  ← base (composed, not user-invoked)
@@ -81,16 +82,16 @@ templates/project-sync/         ← startup sync script template
 **Feature**
 
 ```text
-setup → explore → (research / model) → design → implement → review → ship
+setup → explore → (research / model) → design → implement → review-fix → ship
 ```
 
 **Bug fix** (`/bug` replaces explore + design)
 
 ```text
-setup → bug → implement → review → ship
+setup → bug → implement → review-fix → ship
 ```
 
-`/summarise` works anytime on either track.
+`/review` remains a one-shot review; `/review-fix` loops review ↔ fix until clean. `/summarise` works anytime.
 
 Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, artifact links) is mirrored to markdown when enabled. See `skills/workflow/reference.md`.
 
@@ -103,7 +104,8 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | **model** | user | Math alignment → `MODEL.md` (updates Task continuity) |
 | **design** | user | Topic alignment → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a pipeline Task via managed sub-agents |
-| **review** | user | Two-axis PR review (Standards + Spec) + tracker comment |
+| **review** | user | One-shot Standards + Spec PR review |
+| **review-fix** | user | Review ↔ auto fix-forward until clean → ship |
 | **ship** | user | Merge PR, mark Task Done, close the phase |
 | **summarise** | user | About / workflow stage / what to run Next |
 

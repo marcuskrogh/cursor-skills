@@ -65,7 +65,7 @@ When `WORKSPACE.md` has **Mirror to markdown: true**:
 
 ## Loading workspace
 
-At the start of explore / bug / research / model / design / implement / review / ship / summarise:
+At the start of explore / bug / research / model / design / implement / review / review-fix / ship / summarise:
 
 1. Locate `docs/agents/WORKSPACE.md` (or ask once if missing → `/setup`).
 2. Read **Provider** and provider settings.
