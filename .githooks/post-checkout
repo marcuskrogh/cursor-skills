@@ -1,5 +1,5 @@
 #!/bin/sh
-# Auto-sync skills to ~/.cursor/skills/ after git checkout (branch switch).
+# Auto-sync skills to local agent skill dirs after git checkout (branch switch).
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 case "$REPO_ROOT" in
   *cursor-skills*) ;;

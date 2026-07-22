@@ -1,27 +1,39 @@
-# Sync skills from this repo to ~/.cursor/skills/ for local IDE use.
+# Sync skills from this repo to local agent skill directories.
 # Usage: .\scripts\sync-local.ps1 [-Prune] [-Link]
+#
+# Default targets are common Agent Skills home dirs across popular harnesses.
+# Override with -Targets. For project installs, prefer: npx skills add marcuskrogh/cursor-skills
 
 param(
     [switch]$Prune,
-    [switch]$Link
+    [switch]$Link,
+    [string[]]$Targets = @(
+        (Join-Path $env:USERPROFILE ".agents\skills"),
+        (Join-Path $env:USERPROFILE ".claude\skills"),
+        (Join-Path $env:USERPROFILE ".codex\skills"),
+        (Join-Path $env:USERPROFILE ".copilot\skills"),
+        (Join-Path $env:USERPROFILE ".cursor\skills")
+    )
 )
 
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$SourceDir = Join-Path $RepoRoot ".cursor\skills"
-$TargetDirs = @(
-    (Join-Path $env:USERPROFILE ".cursor\skills"),
-    (Join-Path $env:USERPROFILE ".agents\skills")
-)
+$SourceDir = Join-Path $RepoRoot "skills"
 
 if (-not (Test-Path $SourceDir)) {
     Write-Error "Source directory not found: $SourceDir"
 }
 
-$skillDirs = Get-ChildItem -Path $SourceDir -Directory
+$skillDirs = Get-ChildItem -Path $SourceDir -Directory | Where-Object {
+    Test-Path (Join-Path $_.FullName "SKILL.md")
+}
 
-foreach ($TargetDir in $TargetDirs) {
+if ($skillDirs.Count -eq 0) {
+    Write-Error "No skills with SKILL.md found under $SourceDir"
+}
+
+foreach ($TargetDir in $Targets) {
   New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
   $synced = @()
 
@@ -56,7 +68,7 @@ foreach ($TargetDir in $TargetDirs) {
   }
 
   if ($Prune) {
-    $existing = Get-ChildItem -Path $TargetDir -Directory
+    $existing = Get-ChildItem -Path $TargetDir -Directory -ErrorAction SilentlyContinue
     foreach ($dir in $existing) {
       if ($dir.Name -notin $synced) {
         Write-Host "Pruning ($TargetDir): $($dir.Name)"
@@ -72,3 +84,4 @@ Write-Host ""
 if (-not $Link) {
   Write-Host "Tip: use -Link for live edits without re-syncing (requires Windows Developer Mode or admin)."
 }
+Write-Host "Tip: for project installs, prefer: npx skills add marcuskrogh/cursor-skills"

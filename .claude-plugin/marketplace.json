@@ -1,0 +1,23 @@
+{
+  "name": "marcuskrogh",
+  "owner": {
+    "name": "Marcus Krogh",
+    "url": "https://github.com/marcuskrogh"
+  },
+  "description": "Agent skills for alignment, design, modelling, implementation, and code review.",
+  "plugins": [
+    {
+      "name": "marcus-skills",
+      "source": "./",
+      "description": "Explore/design/model/implement workflows with Jira tracking and two-axis code review.",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "skills",
+        "alignment",
+        "jira",
+        "code-review"
+      ]
+    }
+  ]
+}
