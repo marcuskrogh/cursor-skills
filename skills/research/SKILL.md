@@ -8,12 +8,26 @@ description: >-
 
 # Research
 
-Systematic literature investigation on arXiv for a user-described topic.
-Optional side path on the main pipeline — feeds **model**, **design**, or **explore**.
+Applies [CONCEPT_RESEARCH](../concepts/CONCEPT_RESEARCH.md) as a systematic literature
+investigation on arXiv for a user-described topic. Optional side path on the main
+pipeline — feeds **model**, **define**, or **explore**.
 
-**On invoke:** read [../workflow/reference.md](../workflow/reference.md) and [../tracker/SKILL.md](../tracker/SKILL.md) when a Task key or WORKSPACE exists. Read [reference.md](reference.md) for query syntax.
+**On invoke:** read [../concepts/CONCEPT_RESEARCH.md](../concepts/CONCEPT_RESEARCH.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md) when a Task key or WORKSPACE exists. Read
+[reference.md](reference.md) for query syntax.
 
-**Primary tool:** `scripts/arxiv_research.py` — stdlib Python, MCP-free, official arXiv Atom API → JSON.
+**Primary tool:** `scripts/arxiv_research.py` — stdlib Python, MCP-free, official
+arXiv Atom API → JSON.
+
+## Extension contract
+
+| Extension | This skill |
+|-----------|------------|
+| **Data source** | arXiv Atom API via `scripts/arxiv_research.py` |
+| **Retrieval path** | Script first (`search` / `lookup` / `snowball`); curl/WebFetch fallback only if Python unavailable |
+| **Artifact** | `RESEARCH.md` (path from WORKSPACE) |
+| **Citation rules** | Every claim traces to script JSON; use canonical `arxiv_id` |
 
 ## When to use
 
@@ -33,30 +47,25 @@ python3 scripts/arxiv_research.py lookup --ids 1706.03762,2312.00752
 python3 scripts/arxiv_research.py snowball --ids 1706.03762 --max-results 20
 ```
 
-The script handles URL encoding, rate limiting (≥3 s between API calls), Atom XML parsing, deduplication, and JSON output.
+The script handles URL encoding, rate limiting (≥3 s between API calls), Atom XML
+parsing, deduplication, and JSON output.
 
-**Fallback** (only if Python is unavailable): `curl -sL` on `https://export.arxiv.org/api/query?...` or `WebFetch` on the same URL. Do **not** scrape `arxiv.org/search` unless the request needs DOI, ORCID, ACM, or MSC lookup (see reference.md).
+**Fallback** (only if Python is unavailable): `curl -sL` on
+`https://export.arxiv.org/api/query?...` or `WebFetch` on the same URL. Do **not**
+scrape `arxiv.org/search` unless the request needs DOI, ORCID, ACM, or MSC lookup
+(see reference.md).
 
-## Workflow
+## Workflow specialisation
 
-### 1. Scope the research question
+Follow CONCEPT_RESEARCH. arXiv-specific notes:
 
-Before searching, pin down:
+### Scope
 
-| Dimension | Clarify if missing |
-|-----------|-------------------|
-| **Topic** | Core concepts, synonyms, acronyms |
-| **Intent** | Survey, seminal works, recent advances, method comparison, gap analysis |
-| **Time horizon** | All time, last N years, or explicit date window |
-| **Domain** | arXiv categories (`cat:cs.LG`, `cat:math.OC`, …) |
-| **Depth** | Quick scan (5–10 papers) vs thorough review (25–50+) |
-| **Exclusions** | Topics, methods, or application areas to skip |
+Domain filters use arXiv categories (`cat:cs.LG`, `cat:math.OC`, …).
 
-If the user's message is already specific, infer reasonable defaults and state them briefly. Ask **one** clarifying question only when a wrong assumption would waste the search.
+### Search strategy
 
-### 2. Plan the search strategy
-
-Design **2–4 complementary queries**, not one monolithic string:
+Design **2–4 complementary queries**:
 
 1. **Broad discovery** — `all:` terms + optional `cat:` filter
 2. **Title-focused** — `ti:"key phrase"` for landmark papers
@@ -64,11 +73,9 @@ Design **2–4 complementary queries**, not one monolithic string:
 4. **Recency slice** — same query + `submittedDate:` window
 5. **Author anchor** (if user names researchers) — `au:lastname`
 
-Record the planned queries before executing.
+### Execute (one script call)
 
-### 3. Execute searches (one script call)
-
-Run **all planned queries in a single invocation** — the script throttles internally and deduplicates:
+Run **all planned queries in a single invocation**:
 
 ```bash
 python3 scripts/arxiv_research.py search \
@@ -102,11 +109,7 @@ python3 scripts/arxiv_research.py search -q 'all:topic' --max-results 50 --start
 
 Use `--paginate` to fetch all pages for a query (respects rate limits; use sparingly).
 
-Stop when you have enough high-quality candidates, or when additional pages yield diminishing relevance.
-
-### 4. Snowball from core papers
-
-After identifying 2–5 **core** seed papers, expand coverage in one call:
+### Snowball
 
 ```bash
 python3 scripts/arxiv_research.py snowball \
@@ -115,44 +118,20 @@ python3 scripts/arxiv_research.py snowball \
   --years-back 3
 ```
 
-The script fetches seeds, extracts top authors and categories, runs follow-up queries for recent related work, and excludes the seeds from results. Merge snowball hits into the candidate pool.
+### Triage
 
-### 5. Triage and rank
+Work from the script's JSON `papers` array. Papers appearing in multiple
+`source_queries` are stronger candidates. Prefer `submitted_date`, `journal_ref` /
+`doi`, and title/abstract signals ("survey", "review").
 
-Work from the script's JSON `papers` array. Papers appearing in multiple `source_queries` are stronger candidates.
+### Deep read
 
-Score each paper on:
+Extract from JSON fields: problem, approach, contribution, evidence (`abstract` +
+`comment`), limitations, `abs_url` / `pdf_url`.
 
-- **Relevance** — matches the scoped question
-- **Recency** — `submitted_date` vs time horizon
-- **Centrality** — recurrence across queries, author/category snowball hits, title/abstract signals ("survey", "review")
-- **Quality signals** — clear problem statement, `journal_ref` / `doi` when present
+### Artifact
 
-Produce a short ranked shortlist:
-
-| Tier | Size | Action |
-|------|------|--------|
-| **Core** | 3–8 | Deep read (abstract + metadata) |
-| **Supporting** | 5–15 | Cite in synthesis with one-line relevance |
-| **Peripheral** | rest | Mention only if they fill a gap |
-
-### 6. Deep read (core papers)
-
-For each **Core** paper, extract from JSON fields:
-
-- **Problem** — what gap or question
-- **Approach** — method / architecture / theory
-- **Contribution** — main claim vs prior work
-- **Evidence** — datasets, benchmarks, theorems (from `abstract` + `comment`)
-- **Limitations** — stated or inferable caveats
-- **Links** — `abs_url`, `pdf_url`
-
-Do not hallucinate paper content. If the abstract is insufficient, say so.
-
-### 7. Synthesize and persist
-
-Write the brief to **`RESEARCH.md`** (path from WORKSPACE, default repo root or `docs/`).
-Always include citations with arXiv links.
+Write **`RESEARCH.md`**:
 
 ```markdown
 # Research brief: <topic>
@@ -189,7 +168,7 @@ Always include citations with arXiv links.
 `/<skill> <KEY>` — <why>
 ```
 
-### 8. Update pipeline context
+## Pipeline continuity
 
 When a pipeline **Task** (or Story) key was given or inferred:
 
@@ -199,22 +178,21 @@ When a pipeline **Task** (or Story) key was given or inferred:
 4. If `PLAN.md` exists for the Task, add a **Research** section or link under Open items / Inputs.
 5. Upsert the markdown mirror (`docs/agents/ISSUES.md`) with artifact + **Next**.
 
-Standalone research (no Task): still write `RESEARCH.md`; **Next** may be `/explore` or `/design` if the user wants to start a phase.
+Standalone research (no Task): still write `RESEARCH.md`; **Next** may be `/explore`
+or `/define` if the user wants to start a phase.
 
-### 9. Handoff
-
-Prefer:
+## Handoff
 
 | Context | Next |
 |---------|------|
 | Math-heavy follow-up | `/model <KEY>` |
-| Ready to specify behaviour | `/design <KEY>` |
+| Ready to specify behaviour | `/define <KEY>` |
 | Still scoping the initiative | `/explore` |
 | Only needed the brief | No further skill |
 
 ```markdown
 ## Next
-`/design <KEY>` — Design with research inputs
+`/define <KEY>` — Define with research inputs
 ```
 
 ## Operational rules

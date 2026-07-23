@@ -3,8 +3,10 @@
 #
 # Usage:
 #   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo
-#   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -Skill explore,design
+#   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -Skill explore,define
 #   .\scripts\install-to-project.ps1 -ProjectPath C:\path\to\repo -TargetDir .agents\skills
+#
+# Always installs skills/concepts/ alongside selected skills so CONCEPT_*.md links resolve.
 
 param(
     [Parameter(Mandatory = $true)]
@@ -22,6 +24,7 @@ $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $SourceDir = Join-Path $RepoRoot "skills"
+$ConceptsSource = Join-Path $SourceDir "concepts"
 
 if (-not (Test-Path -LiteralPath $ProjectPath)) {
     Write-Error "Project path not found: $ProjectPath"
@@ -32,6 +35,10 @@ if (-not (Test-Path $SourceDir)) {
     Write-Error "Source directory not found: $SourceDir"
 }
 
+if (-not (Test-Path $ConceptsSource)) {
+    Write-Error "Concepts directory not found: $ConceptsSource"
+}
+
 $destRoot = if ([System.IO.Path]::IsPathRooted($TargetDir)) {
     $TargetDir
 } else {
@@ -39,7 +46,7 @@ $destRoot = if ([System.IO.Path]::IsPathRooted($TargetDir)) {
 }
 
 $available = Get-ChildItem -Path $SourceDir -Directory | Where-Object {
-    Test-Path (Join-Path $_.FullName "SKILL.md")
+    $_.Name -ne "concepts" -and (Test-Path (Join-Path $_.FullName "SKILL.md"))
 }
 
 if ($All -or $Skill.Count -eq 0) {
@@ -63,8 +70,15 @@ foreach ($skill in $toInstall) {
     Write-Host "Installed: $($skill.Name) -> $dest"
 }
 
+$conceptsDest = Join-Path $destRoot "concepts"
+if (Test-Path $conceptsDest) {
+    Remove-Item $conceptsDest -Recurse -Force
+}
+Copy-Item -Path $ConceptsSource -Destination $conceptsDest -Recurse -Force
+Write-Host "Installed: concepts -> $conceptsDest"
+
 Write-Host ""
-Write-Host "Installed $($toInstall.Count) skill(s) to $destRoot"
+Write-Host "Installed $($toInstall.Count) skill(s) + concepts to $destRoot"
 Write-Host "Prefer the universal installer when possible:"
 Write-Host "  npx skills add marcuskrogh/skills"
 Write-Host "Commit $TargetDir to share with collaborators and cloud environments."

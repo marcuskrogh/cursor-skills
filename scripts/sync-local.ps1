@@ -3,6 +3,8 @@
 #
 # Default targets are common Agent Skills home dirs across popular harnesses.
 # Override with -Targets. For project installs, prefer: npx skills add marcuskrogh/skills
+#
+# Always syncs skills/*/ (with SKILL.md) and skills/concepts/ as sibling folders.
 
 param(
     [switch]$Prune,
@@ -20,17 +22,54 @@ $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $SourceDir = Join-Path $RepoRoot "skills"
+$ConceptsSource = Join-Path $SourceDir "concepts"
 
 if (-not (Test-Path $SourceDir)) {
     Write-Error "Source directory not found: $SourceDir"
 }
 
 $skillDirs = Get-ChildItem -Path $SourceDir -Directory | Where-Object {
-    Test-Path (Join-Path $_.FullName "SKILL.md")
+    $_.Name -ne "concepts" -and (Test-Path (Join-Path $_.FullName "SKILL.md"))
 }
 
 if ($skillDirs.Count -eq 0) {
     Write-Error "No skills with SKILL.md found under $SourceDir"
+}
+
+if (-not (Test-Path $ConceptsSource)) {
+    Write-Error "Concepts directory not found: $ConceptsSource"
+}
+
+function Sync-Item {
+    param(
+        [string]$SourcePath,
+        [string]$DestPath,
+        [string]$Label,
+        [switch]$AsLink
+    )
+
+    if ($AsLink) {
+        if (Test-Path $DestPath) {
+            $item = Get-Item $DestPath -Force
+            if ($item.LinkType) {
+                if ($item.Target -eq $SourcePath) {
+                    Write-Host "Linked ($Label)"
+                    return
+                }
+                Remove-Item $DestPath -Force
+            } else {
+                Remove-Item $DestPath -Recurse -Force
+            }
+        }
+        New-Item -ItemType Junction -Path $DestPath -Target $SourcePath | Out-Null
+        Write-Host "Linked ($Label)"
+    } else {
+        if (Test-Path $DestPath) {
+            Remove-Item $DestPath -Recurse -Force
+        }
+        Copy-Item -Path $SourcePath -Destination $DestPath -Recurse -Force
+        Write-Host "Copied ($Label)"
+    }
 }
 
 foreach ($TargetDir in $Targets) {
@@ -39,33 +78,13 @@ foreach ($TargetDir in $Targets) {
 
   foreach ($skill in $skillDirs) {
     $dest = Join-Path $TargetDir $skill.Name
-
-    if ($Link) {
-      if (Test-Path $dest) {
-        $item = Get-Item $dest -Force
-        if ($item.LinkType) {
-          if ($item.Target -eq $skill.FullName) {
-            Write-Host "Linked ($TargetDir): $($skill.Name)"
-            $synced += $skill.Name
-            continue
-          }
-          Remove-Item $dest -Force
-        } else {
-          Remove-Item $dest -Recurse -Force
-        }
-      }
-      New-Item -ItemType Junction -Path $dest -Target $skill.FullName | Out-Null
-      Write-Host "Linked ($TargetDir): $($skill.Name)"
-    } else {
-      if (Test-Path $dest) {
-        Remove-Item $dest -Recurse -Force
-      }
-      Copy-Item -Path $skill.FullName -Destination $dest -Recurse -Force
-      Write-Host "Copied ($TargetDir): $($skill.Name)"
-    }
-
+    Sync-Item -SourcePath $skill.FullName -DestPath $dest -Label "$TargetDir`: $($skill.Name)" -AsLink:$Link
     $synced += $skill.Name
   }
+
+  $conceptsDest = Join-Path $TargetDir "concepts"
+  Sync-Item -SourcePath $ConceptsSource -DestPath $conceptsDest -Label "$TargetDir`: concepts" -AsLink:$Link
+  $synced += "concepts"
 
   if ($Prune) {
     $existing = Get-ChildItem -Path $TargetDir -Directory -ErrorAction SilentlyContinue
@@ -77,7 +96,7 @@ foreach ($TargetDir in $Targets) {
     }
   }
 
-  Write-Host "Synced $($synced.Count) skill(s) to $TargetDir"
+  Write-Host "Synced $($synced.Count) item(s) to $TargetDir"
 }
 
 Write-Host ""

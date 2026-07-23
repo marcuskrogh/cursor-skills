@@ -27,7 +27,7 @@ artifacts except optionally refreshing the mirror **Next** column if it is stale
 | `docs/agents/WORKSPACE.md` | Provider + paths |
 | `docs/agents/ISSUES.md` | Mirror status / Next |
 | `ROADMAP.md` | Phase context / parent Story |
-| `PLAN.md` | Feature design readiness |
+| `PLAN.md` | Feature definition readiness |
 | `BUG.md` | Bug-fix readiness |
 | `MODEL.md` | Model spec |
 | `RESEARCH.md` | Research brief |
@@ -44,9 +44,9 @@ Pick the furthest stage that matches evidence:
 | **setup** | No WORKSPACE (tell user to `/setup`) |
 | **explore** | Story only / feature Task with no PLAN |
 | **bug** | `BUG.md` linked; not yet In Progress |
-| **research** | `RESEARCH.md` linked; design not done |
-| **model** | `MODEL.md` linked; design not done |
-| **design** | Feature Task enriched but plan incomplete; or PLAN exists, not started |
+| **research** | `RESEARCH.md` linked; define not done |
+| **model** | `MODEL.md` linked; define not done |
+| **define** | Feature Task enriched but plan incomplete; or PLAN exists, not started |
 | **implement** | Status In Progress, or branch/PR WIP |
 | **review** | Status In Review; PR open (one-shot) |
 | **review-fix** | Actively looping review↔fix, or preferred post-implement stage |

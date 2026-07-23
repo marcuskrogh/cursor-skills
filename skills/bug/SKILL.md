@@ -1,18 +1,22 @@
 ---
 name: bug
 description: >-
-  Fast bug-report alignment that replaces explore and design for defects.
+  Fast bug-report alignment that replaces explore and define for defects.
   Produces BUG.md and a single tracker Task (optional Sub-tasks), then hands off
   to implement → review → ship. Use when fixing a bug without a full feature pipeline.
 ---
 
 # Bug
 
-Applies [alignment](../alignment/SKILL.md) to a **defect**. Lightweight alternative to
-**explore** + **design** for the [bugfix workflow](../workflow/reference.md#bug-fix-workflow).
+Applies [CONCEPT_ALIGNMENT](../concepts/CONCEPT_ALIGNMENT.md) and
+[CONCEPT_DEFINITION](../concepts/CONCEPT_DEFINITION.md) to a **defect**.
+Lightweight alternative to **explore** + **define** for the
+[bug fix workflow](../workflow/reference.md#bug-fix-workflow).
 
-**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md),
-[../workflow/reference.md](../workflow/reference.md), and [../tracker/SKILL.md](../tracker/SKILL.md).
+**On invoke:** read [../concepts/CONCEPT_ALIGNMENT.md](../concepts/CONCEPT_ALIGNMENT.md),
+[../concepts/CONCEPT_DEFINITION.md](../concepts/CONCEPT_DEFINITION.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md).
 
 ## Extension contract
 
@@ -21,8 +25,9 @@ Applies [alignment](../alignment/SKILL.md) to a **defect**. Lightweight alternat
 | **Subject** | A bug, regression, or incorrect behaviour in the codebase |
 | **Probes** | See [Probes](#probes) |
 | **Stop condition** | Repro, expected vs actual, impact, and fix acceptance are clear enough to implement |
-| **Alignment artifact** | `BUG.md` (path from WORKSPACE; default repo root or `docs/`) |
+| **Alignment / definition artifact** | `BUG.md` (path from WORKSPACE; default repo root or `docs/`) |
 | **Readiness prompt** | "Is this enough to implement the fix?" |
+| **Depth** | Lightweight — prefer fewer questions than full feature define |
 
 ### Probes
 
@@ -44,9 +49,9 @@ Applies [alignment](../alignment/SKILL.md) to a **defect**. Lightweight alternat
 
 ### Scope guard
 
-- No feature design or roadmap work — if it is clearly a feature, redirect to `/explore` or `/design`
+- No feature definition or roadmap work — if it is clearly a feature, redirect to `/explore` or `/define`
 - No implementation or file edits during alignment
-- Keep the loop short — prefer fewer questions than design; stop when implementable
+- Keep the loop short — prefer fewer questions than define; stop when implementable
 
 ## Alignment artifact
 

@@ -2,15 +2,18 @@
 name: implement
 description: >-
   Managed sub-agent implementation against a pipeline Task and Sub-tasks from
-  design. Moves the issue In Progress then In Review; supports fix-forward after
+  define. Moves the issue In Progress then In Review; supports fix-forward after
   review. Persists Next in markdown and the configured tracker.
 ---
 
 # Implement
 
-Applies [implementation](../implementation/SKILL.md) to the **current repository** on the main pipeline Task.
+Applies [CONCEPT_IMPLEMENTATION](../concepts/CONCEPT_IMPLEMENTATION.md) to the
+**current repository** on the main pipeline Task.
 
-**On invoke:** read [../implementation/SKILL.md](../implementation/SKILL.md), [../workflow/reference.md](../workflow/reference.md), and [../tracker/SKILL.md](../tracker/SKILL.md).
+**On invoke:** read [../concepts/CONCEPT_IMPLEMENTATION.md](../concepts/CONCEPT_IMPLEMENTATION.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md).
 
 ## Extension contract
 
@@ -33,7 +36,7 @@ Applies [implementation](../implementation/SKILL.md) to the **current repository
 1. User provides key / URL
 2. Or ask once: "Which issue should this implementation track?"
 
-`fetch` Task + Sub-tasks. Prefer Tasks that already have a design plan.
+`fetch` Task + Sub-tasks. Prefer Tasks that already have a definition plan.
 
 ### Specification priority
 

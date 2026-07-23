@@ -4,7 +4,7 @@
     "name": "Marcus Krogh",
     "url": "https://github.com/marcuskrogh"
   },
-  "description": "Agent skills for workspace setup, features, bugs, research, design, implementation, review-fix, ship, and summarise.",
+  "description": "Agent skills for workspace setup, features, bugs, research, define, implementation, review-fix, ship, and summarise.",
   "plugins": [
     {
       "name": "marcus-skills",
@@ -14,7 +14,8 @@
       "keywords": [
         "engineering",
         "skills",
-        "alignment",
+        "concepts",
+        "define",
         "research",
         "review-fix"
       ]

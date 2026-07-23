@@ -8,13 +8,14 @@ description: >-
 
 # Model
 
-Applies [alignment](../alignment/SKILL.md) to **applied mathematical** topics.
-Optional side path on the main pipeline — usually after **research** or **explore**,
-before or alongside **design**, and before **implement**.
+Applies [CONCEPT_ALIGNMENT](../concepts/CONCEPT_ALIGNMENT.md) to **applied
+mathematical** topics. Optional side path on the main pipeline — usually after
+**research** or **explore**, before or alongside **define**, and before **implement**.
 
-**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md), [format.md](format.md),
-[reference.md](reference.md), [../workflow/reference.md](../workflow/reference.md),
-and [../tracker/SKILL.md](../tracker/SKILL.md).
+**On invoke:** read [../concepts/CONCEPT_ALIGNMENT.md](../concepts/CONCEPT_ALIGNMENT.md),
+[format.md](format.md), [reference.md](reference.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md).
 
 ## Extension contract
 
@@ -32,7 +33,7 @@ and [../tracker/SKILL.md](../tracker/SKILL.md).
 
 - Model class, state/input/output structure, constraints, objectives
 - Numerical schemes, estimation/control choices, discretisation
-- Pipeline Task key from **explore** / **design** (preferred)
+- Pipeline Task key from **explore** / **define** (preferred)
 - Related `RESEARCH.md` if present
 - Target path for `MODEL.md` (default from WORKSPACE)
 
@@ -83,13 +84,13 @@ Use the **definition hierarchy** from [format.md](format.md).
 
 | Context | Next |
 |---------|------|
-| Behaviour/UX still open | `/design <KEY>` |
+| Behaviour/UX still open | `/define <KEY>` |
 | Plan already complete | `/implement <KEY>` |
 | Need literature first | `/research <KEY>` |
 
 ```markdown
 ## Next
-`/design <KEY>` — Design implementation around this model
+`/define <KEY>` — Define implementation around this model
 ```
 
 ## Examples

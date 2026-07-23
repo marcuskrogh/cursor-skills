@@ -4,15 +4,17 @@ description: >-
   Workspace alignment for a repository: choose issue tracker (markdown, Jira,
   GitHub, or Linear), artifact paths, and delivery conventions. Writes
   docs/agents/WORKSPACE.md so pipeline skills persist continuity in markdown.
-  Use when onboarding a repo, changing tracker, or before first explore/design.
+  Use when onboarding a repo, changing tracker, or before first explore/define.
 ---
 
 # Setup
 
-Applies [alignment](../alignment/SKILL.md) to **workspace configuration** for this repository.
-Produces `docs/agents/WORKSPACE.md` (path overridable) that all pipeline skills read first.
+Applies [CONCEPT_ALIGNMENT](../concepts/CONCEPT_ALIGNMENT.md) to **workspace
+configuration** for this repository. Produces `docs/agents/WORKSPACE.md` (path
+overridable) that all pipeline skills read first.
 
-**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md), [format.md](format.md), and [../tracker/reference.md](../tracker/reference.md).
+**On invoke:** read [../concepts/CONCEPT_ALIGNMENT.md](../concepts/CONCEPT_ALIGNMENT.md),
+[format.md](format.md), and [../tracker/reference.md](../tracker/reference.md).
 
 ## Extension contract
 
@@ -42,7 +44,7 @@ Produces `docs/agents/WORKSPACE.md` (path overridable) that all pipeline skills 
 
 ### Scope guard
 
-- No feature design, modelling, or implementation
+- No feature definition, modelling, or implementation
 - Do not create pipeline Story/Task issues during setup (only config + empty dirs/index if markdown)
 
 ## After approval

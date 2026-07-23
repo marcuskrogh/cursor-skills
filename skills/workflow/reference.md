@@ -15,7 +15,7 @@ Agent reference for the primary delivery pipeline. **Not a user-invoked skill.**
 ```text
 setup (once per repo)
    ↓
-explore  →  design  →  implement  →  review-fix  →  ship
+explore  →  define  →  implement  →  review-fix  →  ship
    │           │            │              │               │
  ROADMAP.md  PLAN.md     branch+PR    review↔fix loop   merge+Done
  Story+Tasks  same Task   same Task      same Task        same Task
@@ -36,24 +36,24 @@ BUG.md   branch+PR    review↔fix loop   merge+Done
  Task     same Task      same Task        same Task
 ```
 
-**`/bug` replaces explore + design** for defects: one short alignment → `BUG.md` + one
-Task → same delivery loop. Use **explore/design** when the change is a feature or
-needs product/design decisions; use **bug** when behaviour is wrong and the fix is
+**`/bug` replaces explore + define** for defects: one short alignment → `BUG.md` + one
+Task → same delivery loop. Use **explore/define** when the change is a feature or
+needs product/definition decisions; use **bug** when behaviour is wrong and the fix is
 the work.
 
 ### Side paths (same Task + shared markdown)
 
 | Skill | Artifact | When | Continuity updates |
 |-------|----------|------|--------------------|
-| **research** | `RESEARCH.md` | Literature before design/model | Task link, ROADMAP/PLAN notes, ISSUES mirror, **Next** |
-| **model** | `MODEL.md` | Math spec before/with design | Task link (prefer enrich, no parallel Task), ROADMAP/PLAN/RESEARCH links, ISSUES mirror, **Next** |
+| **research** | `RESEARCH.md` | Literature before define/model | Task link, ROADMAP/PLAN notes, ISSUES mirror, **Next** |
+| **model** | `MODEL.md` | Math spec before/with define | Task link (prefer enrich, no parallel Task), ROADMAP/PLAN/RESEARCH links, ISSUES mirror, **Next** |
 | **summarise** | *(read-only)* | Anytime (feature or bug Task) | Reports About / Stage / **Next** from the above |
 
 Typical feature inserts:
 
 ```text
-… → /research <Task> → /model <Task> → /design <Task> → …
-… → /research <Task> → /design <Task> → …
+… → /research <Task> → /model <Task> → /define <Task> → …
+… → /research <Task> → /define <Task> → …
 … → /model <Task> → /implement <Task> → …   (if PLAN already exists)
 ```
 
@@ -81,7 +81,7 @@ GitHub, or Linear:
 |------|------|
 | `docs/agents/WORKSPACE.md` | Tracker + path + delivery decisions (`/setup`) |
 | `ROADMAP.md` | Initiative + phases + keys + **Next** (features) |
-| `PLAN.md` | Design spec + keys + **Next** (features) |
+| `PLAN.md` | Definition / plan + keys + **Next** (features) |
 | `BUG.md` | Bug report + acceptance + **Next** (bug fixes) |
 | `RESEARCH.md` | Literature brief + Task link + **Next** |
 | `MODEL.md` | Math spec + Task link + **Next** |
@@ -97,9 +97,9 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 
 | Stage | Ticket action |
 |-------|----------------|
-| **explore** | Create **Story** + one **Task** per roadmap phase. Tasks are design-ready placeholders. |
+| **explore** | Create **Story** + one **Task** per roadmap phase. Tasks are define-ready placeholders. |
 | **bug** | Create one **Task** (+ optional Sub-tasks) from `BUG.md`. No Story unless requested. |
-| **design** | Take an explore **Task**. Enrich *that* issue (description, `PLAN.md`, Sub-tasks). Do **not** create a parallel design ticket when an explore Task is the subject. |
+| **define** | Take an explore **Task**. Enrich *that* issue (description, `PLAN.md`, Sub-tasks). Do **not** create a parallel definition ticket when an explore Task is the subject. |
 | **implement** | Work the **same Task** (and its Sub-tasks). Spec from `PLAN.md` or `BUG.md`. Branch + PR; move to **In Review**. |
 | **review** | One-shot Standards + Spec review; may hand off to fix-forward manually. |
 | **review-fix** | Review → fix-forward → re-review until clean (or max iterations); then ship. |
@@ -110,16 +110,16 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | Entry | Behavior |
 |-------|----------|
 | `/bug` | Create Task from bug alignment; Next `/implement`. |
-| `/design` with no prior explore Task | Create a new Task (+ Sub-tasks) as the pipeline owner. |
+| `/define` with no prior explore Task | Create a new Task (+ Sub-tasks) as the pipeline owner. |
 | `/implement` with an issue that already has PLAN or BUG | Allowed. |
-| Skip **design** on features | Only when already implementation-ready. Prefer design for non-trivial features. |
+| Skip **define** on features | Only when already implementation-ready. Prefer define for non-trivial features. |
 
 ### Linking
 
 - Explore Tasks → parent Story via provider parent/relates.
 - Bug Tasks are usually standalone; may **Relates** to a Story/Task if they block a phase.
-- Design/implement/review/ship comments stay on the **same Task**.
-- Comment on the parent Story at design completion and at ship (phase Done).
+- Define/implement/review/ship comments stay on the **same Task**.
+- Comment on the parent Story at define completion and at ship (phase Done).
 
 ## Artifacts
 
@@ -130,7 +130,7 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | `BUG.md` | bug | Defect report + acceptance for implement/review |
 | `RESEARCH.md` | research | Literature brief for a phase/Task |
 | `MODEL.md` | model | Mathematical specification |
-| `PLAN.md` | design | Spec for implement + Spec-axis review |
+| `PLAN.md` | define | Spec for implement + Spec-axis review |
 | Branch + PR | implement | Delivery vehicle |
 | PR review | review / review-fix | Standards + Spec findings (+ auto fix-forward in review-fix) |
 | Merge + Done | ship | Closeout |
@@ -150,11 +150,11 @@ Every pipeline skill **ends** by telling the user the next invoke:
 | After | Next (default) |
 |-------|----------------|
 | setup | `/explore` or `/bug` (depending on intent) |
-| explore | `/design <first-priority-Task>` (or `/research` / `/model` if needed first) |
+| explore | `/define <first-priority-Task>` (or `/research` / `/model` if needed first) |
 | bug | `/implement <Task>` |
-| research | `/model <Task>` or `/design <Task>` |
-| model | `/design <Task>` or `/implement <Task>` if plan exists |
-| design | `/implement <Task>` |
+| research | `/model <Task>` or `/define <Task>` |
+| model | `/define <Task>` or `/implement <Task>` if plan exists |
+| define | `/implement <Task>` |
 | implement | `/review-fix <Task>` (preferred) or `/review <Task>` |
 | review (blocking findings / `REQUEST_CHANGES`) | `/implement <Task>` (fix-forward) — or use `/review-fix` to automate |
 | review (no blockers) | `/ship <Task>` |
@@ -172,7 +172,7 @@ alignment artifact, and the ISSUES mirror when enabled.
 |-------|------|
 | bug | Existing related Task/Story if linked; codebase pointers from user only |
 | research / model | Task (+ Story), `ROADMAP.md`, sibling artifacts (`RESEARCH.md` / `MODEL.md` / `PLAN.md`) |
-| design | Task (+ parent Story), `ROADMAP.md`, `RESEARCH.md` / `MODEL.md` if present |
+| define | Task (+ parent Story), `ROADMAP.md`, `RESEARCH.md` / `MODEL.md` if present |
 | implement | Task + Sub-tasks, `PLAN.md` or `BUG.md` / `MODEL.md` / linked specs |
 | review / review-fix | Task + PR + `PLAN.md` or `BUG.md` / specs |
 | ship | Task + PR + latest review outcome |
@@ -182,7 +182,7 @@ alignment artifact, and the ISSUES mirror when enabled.
 
 ```text
 To Do / Backlog  →  In Progress  →  In Review  →  Done
-     explore/design      implement        implement     ship
+     explore/define      implement        implement     ship
      research/model                       review
      bug
 ```
@@ -198,7 +198,7 @@ enabled). Chat-only status is not enough.
 | **bug** | Create Task (+ optional Sub-tasks); link BUG.md | Leave **To Do** | Task comment: BUG.md + **Next**; ISSUES | — |
 | **research** | Enrich pipeline Task (artifact link); no new Task if key given | Leave Task status unchanged (usually **To Do**) | Task comment: RESEARCH.md + summary + **Next**; ROADMAP/PLAN/ISSUES | — |
 | **model** | Enrich pipeline Task (preferred); else create Task | Leave **To Do** unless already further along | Task comment: MODEL.md + **Next**; ROADMAP/PLAN/RESEARCH/ISSUES | — |
-| **design** | Enrich Task; create Sub-tasks per work package | Task stays **To Do** (ready to implement) | Task + Story comments: PLAN.md, sub-task keys, **Next**; ISSUES | — |
+| **define** | Enrich Task; create Sub-tasks per work package | Task stays **To Do** (ready to implement) | Task + Story comments: PLAN.md, sub-task keys, **Next**; ISSUES | — |
 | **implement** | May add missing Sub-tasks if plan/bug requires | Task → **In Progress** at start; each Sub-task → **In Progress** then **Done** when finished; Task → **In Review** when PR ready | Comments on Task (session start, packages, PR URL + **Next** `/review-fix`); ISSUES | Sub-tasks **Done** as packages complete — not the parent Task |
 | **implement** (fix-forward) | — | Task → **In Progress** if needed, then **In Review** again | Comment: threads addressed + **Next** `/review` or continue inside `/review-fix`; ISSUES | — |
 | **review** | — | Must already be **In Review**; do **not** change to Done | Task comment: review summary + **Next**; ISSUES | — |
@@ -223,7 +223,7 @@ After a successful merge (or confirmed already-merged PR), **ship** closes track
 3. **Story** (if linked):
    - Comment that this phase Task is Done (key + PR).
    - If **all** child Tasks of the Story are **Done**, `transition` Story → **Done** and comment "Initiative complete".
-   - Otherwise leave Story open; set Story **Next** hint to `/design <next-open-Task>` or `/summarise <Story>`.
+   - Otherwise leave Story open; set Story **Next** hint to `/define <next-open-Task>` or `/summarise <Story>`.
 4. **Markdown** — upsert ISSUES mirror (Task/Sub-tasks/Story statuses); update `ROADMAP.md` phase row to Done + PR link; sync markdown `INDEX.md` if provider is markdown.
 5. **Stop** if merge failed — do not close anything.
 
@@ -243,7 +243,7 @@ Prefer **`/review-fix <KEY>`** to run steps 1–5 automatically until clean (see
 
 - Creating issues before `WORKSPACE.md` exists (run `/setup` first)
 - Hardcoding Jira (or any single provider) when WORKSPACE selects another
-- Creating a second Task in design when an explore Task was provided
+- Creating a second Task in define when an explore Task was provided
 - Ending a pipeline skill without tracker comment + **Next** (+ mirror)
 - Marking **Done** from implement or review (that is **ship**)
 - Shipping while Sub-tasks remain open

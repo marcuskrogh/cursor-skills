@@ -8,11 +8,30 @@ description: >-
 
 # Review
 
-Deep review posted **on the GitHub pull request** and summarized on the **pipeline
-issue** (tracker from WORKSPACE) — not as repo files or long chat transcripts.
+Applies [CONCEPT_REVIEW](../concepts/CONCEPT_REVIEW.md) as a deep review posted
+**on the GitHub pull request** and summarized on the **pipeline issue** (tracker
+from WORKSPACE) — not as repo files or long chat transcripts.
 
-Four axes run as **parallel sub-agents**. Each axis must investigate both
-**vertically** (deep within a change) and **horizontally** (across related code):
+**On invoke:** read [../concepts/CONCEPT_REVIEW.md](../concepts/CONCEPT_REVIEW.md),
+[../workflow/reference.md](../workflow/reference.md), [checklist.md](checklist.md),
+and [../tracker/SKILL.md](../tracker/SKILL.md).
+
+Requires authenticated `gh` and tracker auth per WORKSPACE. If either is missing,
+stop and tell the user.
+
+## Extension contract
+
+| Extension | This skill |
+|-----------|------------|
+| **Change source** | GitHub PR linked to the pipeline Task (or current branch) |
+| **Spec source** | Tracker issue + `PLAN.md` / `BUG.md` / `MODEL.md` |
+| **Publish target** | GitHub PR review via `gh api` + tracker comment |
+| **Checklist** | [checklist.md](checklist.md) — paste into each sub-agent brief |
+
+## Axes (this skill)
+
+Four axes run as **parallel sub-agents**. Each axis investigates both **vertically**
+and **horizontally** per CONCEPT_REVIEW:
 
 | Axis | Focus |
 |------|--------|
@@ -20,13 +39,6 @@ Four axes run as **parallel sub-agents**. Each axis must investigate both
 | **Correctness** | Will it work under real inputs and failures — logic, edges, errors, races, tests? |
 | **Integration** | Does it fit the rest of the system — callers, contracts, auth, data flow, config? |
 | **Standards** | Repo conventions + smell baseline (judgement calls; repo docs win). |
-
-Read [checklist.md](checklist.md) and paste the relevant sections into each sub-agent brief.
-
-**On invoke:** read [../workflow/reference.md](../workflow/reference.md),
-[checklist.md](checklist.md), and [../tracker/SKILL.md](../tracker/SKILL.md).
-
-Requires authenticated `gh` and tracker auth per WORKSPACE. If either is missing, stop and tell the user.
 
 ## Process
 
@@ -56,7 +68,7 @@ Sub-agents must not review hunks in isolation. The manager prepares:
 
 1. **Changed paths** — `gh pr diff <n> --name-only`.
 2. **Full file snapshots** for each changed source file at `HEAD` (cap: skip generated/vendor/minified; for huge files, provide ±100 lines around each hunk plus signatures/imports).
-3. **Neighbor map** — for each changed symbol/module, list likely callers/callees/tests ( ripgrep for symbol names, same-package imports, `*_test.*` / `__tests__` / neighbouring files). Include those file excerpts when they clarify contracts.
+3. **Neighbor map** — for each changed symbol/module, list likely callers/callees/tests (ripgrep for symbol names, same-package imports, `*_test.*` / `__tests__` / neighbouring files). Include those file excerpts when they clarify contracts.
 4. **Spec pack** — issue body, sub-tasks, `PLAN.md` / `BUG.md` / `MODEL.md` as applicable.
 5. **Standards pack** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, linters config names if present.
 6. **Evidence from tooling** (when cheap and available in-repo): run the project's usual lint/typecheck/test for the touched area (or full suite if that is the norm). Capture failing command output as **Correctness** inputs — do not invent CI results.
@@ -87,15 +99,9 @@ vertical_or_horizontal: vertical | horizontal
 body: <markdown: problem → evidence → suggested fix; prefix with **Axis**>
 ```
 
-**Severity**
-
-| Level | Meaning | Ship impact |
-|-------|---------|-------------|
-| `blocker` | Wrong/missing required behaviour, likely prod bug, security hole, or hard standard breach | `REQUEST_CHANGES`; must fix before ship |
-| `should-fix` | Clear defect or gap that should not ship | Treat as blocking for handoff / review-fix |
-| `note` | Improvement, smell, optional cleanup | Soft; does not block ship alone |
-
-**Budgets:** max **20** findings per axis, **≤800 words** per axis. Prefer fewer high-severity findings over many notes. Every finding needs **evidence** (file/line or spec quote) and a **concrete fix hint** so fix-forward can succeed in one pass.
+Use CONCEPT_REVIEW severity meanings. **Budgets:** max **20** findings per axis,
+**≤800 words** per axis. Prefer fewer high-severity findings over many notes. Every
+finding needs **evidence** and a **concrete fix hint**.
 
 #### Spec sub-agent
 
@@ -205,14 +211,3 @@ or
 ## Next
 `/ship <KEY>` — Merge PR and close the Task
 ```
-
-## Why four axes + two directions
-
-A change can look fine on one cut and fail on another:
-
-- Spec-correct but crashes on empty input → **Correctness**
-- Locally correct but breaks callers / auth → **Integration**
-- Works and integrates but ignores repo standards → **Standards**
-- Clean code that solves the wrong problem → **Spec**
-
-**Vertical** catches bugs inside a path; **horizontal** catches breaks across the system. Both are required on every axis that applies.

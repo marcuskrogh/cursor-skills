@@ -10,7 +10,7 @@ Backend files implement these operations.
 | Logical type | Role in pipeline |
 |--------------|------------------|
 | **Story** | Explore parent — holds phases |
-| **Task** | Pipeline owner from design → ship (one Task per phase) |
+| **Task** | Pipeline owner from define → ship (one Task per phase) |
 | **Sub-task** | Work package under a Task |
 
 Map these names to provider-native types in the backend file.
@@ -43,7 +43,7 @@ Handoffs always use the provider's issue key:
 
 ```markdown
 ## Next
-`/design <KEY>` — …
+`/define <KEY>` — …
 ```
 
 Examples: `MD-2`, `PROJ-124`, `#42`, `ENG-123`.
@@ -65,7 +65,7 @@ When `WORKSPACE.md` has **Mirror to markdown: true**:
 
 ## Loading workspace
 
-At the start of explore / bug / research / model / design / implement / review / review-fix / ship / summarise:
+At the start of explore / bug / research / model / define / implement / review / review-fix / ship / summarise:
 
 1. Locate `docs/agents/WORKSPACE.md` (or ask once if missing → `/setup`).
 2. Read **Provider** and provider settings.

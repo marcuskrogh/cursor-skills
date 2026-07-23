@@ -2,15 +2,18 @@
 name: explore
 description: >-
   High-level alignment on a project or feature idea. Produces a roadmap and
-  tracker Story/Tasks for later design on the main pipeline. Persists keys and
+  tracker Story/Tasks for later define on the main pipeline. Persists keys and
   Next in markdown. Use when exploring scope or prioritising work at project scale.
 ---
 
 # Explore
 
-Applies [alignment](../alignment/SKILL.md) at **project or feature scale**. Produces `ROADMAP.md` and tracker issues that feed **design**.
+Applies [CONCEPT_ALIGNMENT](../concepts/CONCEPT_ALIGNMENT.md) at **project or
+feature scale**. Produces `ROADMAP.md` and tracker issues that feed **define**.
 
-**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md), [../workflow/reference.md](../workflow/reference.md), and [../tracker/SKILL.md](../tracker/SKILL.md) (loads `WORKSPACE.md` + provider backend).
+**On invoke:** read [../concepts/CONCEPT_ALIGNMENT.md](../concepts/CONCEPT_ALIGNMENT.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md) (loads `WORKSPACE.md` + provider backend).
 
 ## Extension contract
 
@@ -40,7 +43,7 @@ Applies [alignment](../alignment/SKILL.md) at **project or feature scale**. Prod
 
 ### Scope guard
 
-- No detailed component or system design
+- No detailed component or system definition
 - No mathematical modelling
 - No code or implementation
 
@@ -70,14 +73,14 @@ Applies [alignment](../alignment/SKILL.md) at **project or feature scale**. Prod
 - Tasks: <KEY>, …
 
 ## Next
-`/design <KEY>` — Design the first-priority phase
+`/define <KEY>` — Define the first-priority phase
 ```
 
 ## Tracker (after approval)
 
 1. Resolve provider ops via [../tracker/reference.md](../tracker/reference.md).
 2. Create a **Story** (Goals + Scope) — status **To Do**.
-3. For each phase, create a **Task** linked to the Story — status **To Do** (pipeline owner for design → ship).
+3. For each phase, create a **Task** linked to the Story — status **To Do** (pipeline owner for define → ship).
 4. `comment` on the Story with child keys + **Next**; upsert ISSUES mirror (Story + all Tasks).
 5. Update `ROADMAP.md`; report keys/URLs and **Next**. Session ends.
 
@@ -96,7 +99,7 @@ Applies [alignment](../alignment/SKILL.md) at **project or feature scale**. Prod
 
 ```markdown
 ## Next
-`/design <TASK-KEY>` — Design phase: <topic>
+`/define <TASK-KEY>` — Define phase: <topic>
 ```
 
 ## Examples

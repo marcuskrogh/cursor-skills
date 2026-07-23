@@ -1,6 +1,6 @@
 # Agent Skills
 
-Reusable agent skills for workspace setup, alignment, design, modelling, implementation, review, and ship.
+Reusable agent skills for workspace setup, alignment, definition, modelling, implementation, review, and ship.
 
 Built on the [Agent Skills](https://agentskills.io) standard. Install once via [skills.sh](https://skills.sh); works with any compatible harness (Cursor, Claude Code, Codex, GitHub Copilot, and others).
 
@@ -12,7 +12,7 @@ Built on the [Agent Skills](https://agentskills.io) standard. Install once via [
 npx skills add marcuskrogh/skills
 ```
 
-Pick the skills you want and which agents to install them for. Skills land in each agent's standard skill directory (project or global). Relative links between skills stay intact because they install as siblings under `.agents/skills/` (or the equivalent home for that agent).
+Pick the skills you want and which agents to install them for. Skills land in each agent's standard skill directory (project or global). Relative links between skills stay intact because they install as siblings under `.agents/skills/` (or the equivalent home for that agent). Concepts install alongside as `concepts/` (not invokable).
 
 ## Optional: Claude Code plugin
 
@@ -54,19 +54,23 @@ If the environment is **Cursor Cloud**, also pass `-WireCursorCloud` to add `.cu
 
 ```
 skills/                         ← source of truth (Agent Skills layout)
+├── concepts/                   ← uninvokable CONCEPT_*.md (loaded only when a skill references them)
+│   ├── CONCEPT_ALIGNMENT.md
+│   ├── CONCEPT_IMPLEMENTATION.md
+│   ├── CONCEPT_DEFINITION.md
+│   ├── CONCEPT_RESEARCH.md
+│   └── CONCEPT_REVIEW.md
 ├── setup/                      ← workspace alignment → docs/agents/WORKSPACE.md
 ├── explore/                    ← project/feature alignment → ROADMAP.md
-├── bug/                        ← defect alignment → BUG.md (skips explore/design)
+├── bug/                        ← defect alignment → BUG.md (skips explore/define)
 ├── research/                   ← literature brief → RESEARCH.md
 ├── model/                      ← mathematical alignment → MODEL.md
-├── design/                     ← topic alignment → PLAN.md (enriches pipeline Task)
+├── define/                     ← topic definition → PLAN.md (enriches pipeline Task)
 ├── implement/                  ← managed implementation from a pipeline Task
 ├── review/                     ← multi-axis Spec/Correctness/Integration/Standards
 ├── review-fix/                ← review ↔ fix-forward until clean
 ├── ship/                       ← merge + Done closeout
 ├── summarise/                  ← status: about / stage / Next
-├── alignment/                  ← base (composed, not user-invoked)
-├── implementation/             ← base (composed, not user-invoked)
 ├── tracker/                    ← pluggable issue tracker (markdown/jira/github/linear)
 ├── jira/                       ← Jira REST details (tracker backend)
 ├── workflow/                   ← pipeline contract (composed)
@@ -77,15 +81,24 @@ scripts/                        ← validate / sync / project bootstrap (incl. a
 templates/project-sync/         ← startup sync script template
 ```
 
+### Concepts vs skills
+
+| Kind | Naming | Invokable? | In agent skill list? | When loaded |
+|------|--------|------------|----------------------|-------------|
+| **Skill** | `skills/<name>/SKILL.md` | Yes (unless `disable-model-invocation`) | Yes (name + description) | On invoke / composition |
+| **Concept** | `skills/concepts/CONCEPT_<NAME>.md` | No | No | Only when an invoked skill tells the agent to read it |
+
+Invokable skills **derive from** concepts and further specify them for a purpose (e.g. `define` applies alignment + definition for a pipeline Task; `bug` applies the same concepts lightly for defects).
+
 ## Pipelines
 
 **Feature**
 
 ```text
-setup → explore → (research / model) → design → implement → review-fix → ship
+setup → explore → (research / model) → define → implement → review-fix → ship
 ```
 
-**Bug fix** (`/bug` replaces explore + design)
+**Bug fix** (`/bug` replaces explore + define)
 
 ```text
 setup → bug → implement → review-fix → ship
@@ -102,7 +115,7 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | **bug** | user | Defect alignment → `BUG.md` + Task (then implement) |
 | **research** | user | Literature brief → `RESEARCH.md` (updates Task continuity) |
 | **model** | user | Math alignment → `MODEL.md` (updates Task continuity) |
-| **design** | user | Topic alignment → `PLAN.md` + Sub-tasks on the pipeline Task |
+| **define** | user | Topic definition → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a pipeline Task via managed sub-agents |
 | **review** | user | Thorough multi-axis PR review (Spec, Correctness, Integration, Standards) |
 | **review-fix** | user | Review ↔ auto fix-forward until clean → ship |
@@ -114,15 +127,13 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | Skill | Invoke | Purpose |
 |-------|--------|---------|
 | **manage-skills** | user | Maintain and sync this repository |
-| **alignment** | composed | Base questioning loop |
-| **implementation** | composed | Base manager/sub-agent loop |
 | **tracker** | composed | Issue tracker contract + backends |
 | **jira** | composed | Jira REST details for the jira backend |
 | **workflow** | composed | Pipeline continuity + handoffs |
 
 ## Workflow for skill changes
 
-1. Edit `skills/<name>/` in this repo.
+1. Edit `skills/<name>/` or `skills/concepts/` in this repo.
 2. `.\scripts\validate-skills.ps1`
 3. `.\scripts\sync-local.ps1 -Prune` (or rely on the post-merge hook after `git pull`)
 4. `git commit` / `git push`
@@ -136,7 +147,7 @@ Use `/manage-skills` for the full checklist.
 | `setup.ps1` | Author setup — validate, sync local homes, git hooks |
 | `sync-local.ps1` / `sync-local.sh` | Mirror `skills/` into local agent homes |
 | `install-to-project.ps1` | Copy skills into a project's `.agents/skills` |
-| `validate-skills.ps1` | Frontmatter, naming, plugin.json coverage |
+| `validate-skills.ps1` | Frontmatter, naming, plugin.json coverage, concepts |
 | `setup-project-sync.ps1` | Wire startup sync into a project (optional `-WireCursorCloud`) |
 | `setup-github.ps1` | First-time push to GitHub |
 

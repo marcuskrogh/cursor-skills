@@ -3,7 +3,7 @@ name: tracker
 description: >-
   Shared issue-tracker contract for pipeline skills. Resolves the provider from
   docs/agents/WORKSPACE.md (markdown, jira, github, or linear). Not for user
-  invocation — composed by explore, design, implement, review, ship, and setup.
+  invocation — composed by explore, define, implement, review, ship, and setup.
 disable-model-invocation: true
 ---
 

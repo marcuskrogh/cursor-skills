@@ -4,6 +4,8 @@
 #
 # Default targets are common Agent Skills home dirs. Override by editing TARGET_DIRS
 # or use: npx skills add marcuskrogh/skills
+#
+# Always syncs skills/*/ (with SKILL.md) and skills/concepts/ as sibling folders.
 
 set -euo pipefail
 
@@ -20,6 +22,7 @@ done
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SOURCE_DIR="$REPO_ROOT/skills"
+CONCEPTS_SOURCE="$SOURCE_DIR/concepts"
 
 TARGET_DIRS=(
   "${HOME}/.agents/skills"
@@ -34,11 +37,32 @@ if [[ ! -d "$SOURCE_DIR" ]]; then
   exit 1
 fi
 
-mapfile -t SKILL_PATHS < <(find "$SOURCE_DIR" -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/SKILL.md" \; -print | sort)
+if [[ ! -d "$CONCEPTS_SOURCE" ]]; then
+  echo "Concepts directory not found: $CONCEPTS_SOURCE" >&2
+  exit 1
+fi
+
+mapfile -t SKILL_PATHS < <(find "$SOURCE_DIR" -mindepth 1 -maxdepth 1 -type d ! -name concepts -exec test -f "{}/SKILL.md" \; -print | sort)
 if [[ ${#SKILL_PATHS[@]} -eq 0 ]]; then
   echo "No skills with SKILL.md found under $SOURCE_DIR" >&2
   exit 1
 fi
+
+sync_item() {
+  local source_path="$1"
+  local dest="$2"
+  local label="$3"
+
+  if $LINK; then
+    rm -rf "$dest"
+    ln -s "$source_path" "$dest"
+    echo "Linked ($label)"
+  else
+    rm -rf "$dest"
+    cp -R "$source_path" "$dest"
+    echo "Copied ($label)"
+  fi
+}
 
 for TARGET_DIR in "${TARGET_DIRS[@]}"; do
   mkdir -p "$TARGET_DIR"
@@ -47,19 +71,12 @@ for TARGET_DIR in "${TARGET_DIRS[@]}"; do
   for skill_path in "${SKILL_PATHS[@]}"; do
     skill_name="$(basename "$skill_path")"
     dest="$TARGET_DIR/$skill_name"
-
-    if $LINK; then
-      rm -rf "$dest"
-      ln -s "$skill_path" "$dest"
-      echo "Linked ($TARGET_DIR): $skill_name"
-    else
-      rm -rf "$dest"
-      cp -R "$skill_path" "$dest"
-      echo "Copied ($TARGET_DIR): $skill_name"
-    fi
-
+    sync_item "$skill_path" "$dest" "$TARGET_DIR: $skill_name"
     SYNCED+=("$skill_name")
   done
+
+  sync_item "$CONCEPTS_SOURCE" "$TARGET_DIR/concepts" "$TARGET_DIR: concepts"
+  SYNCED+=("concepts")
 
   if $PRUNE; then
     for existing in "$TARGET_DIR"/*; do
@@ -79,7 +96,7 @@ for TARGET_DIR in "${TARGET_DIRS[@]}"; do
     done
   fi
 
-  echo "Synced ${#SYNCED[@]} skill(s) to $TARGET_DIR"
+  echo "Synced ${#SYNCED[@]} item(s) to $TARGET_DIR"
 done
 
 echo ""

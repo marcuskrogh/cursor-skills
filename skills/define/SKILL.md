@@ -1,16 +1,21 @@
 ---
-name: design
+name: define
 description: >-
-  Alignment on a component or system for the main pipeline. Enriches an explore
+  Define a component, system, or pipeline Task before coding. Enriches an explore
   Task (or creates a Task) with PLAN.md and Sub-tasks. Persists keys and Next in
-  markdown. Use when agreeing on design before coding.
+  markdown. Use when agreeing on a definition before implementation.
 ---
 
-# Design
+# Define
 
-Applies [alignment](../alignment/SKILL.md) to a **specific topic**. Produces `PLAN.md` and Sub-tasks on the **pipeline Task**.
+Applies [CONCEPT_ALIGNMENT](../concepts/CONCEPT_ALIGNMENT.md) and
+[CONCEPT_DEFINITION](../concepts/CONCEPT_DEFINITION.md) to a **specific topic**.
+Produces `PLAN.md` and Sub-tasks on the **pipeline Task**.
 
-**On invoke:** read [../alignment/SKILL.md](../alignment/SKILL.md), [../workflow/reference.md](../workflow/reference.md), and [../tracker/SKILL.md](../tracker/SKILL.md).
+**On invoke:** read [../concepts/CONCEPT_ALIGNMENT.md](../concepts/CONCEPT_ALIGNMENT.md),
+[../concepts/CONCEPT_DEFINITION.md](../concepts/CONCEPT_DEFINITION.md),
+[../workflow/reference.md](../workflow/reference.md), and
+[../tracker/SKILL.md](../tracker/SKILL.md).
 
 ## Extension contract
 
@@ -19,10 +24,12 @@ Applies [alignment](../alignment/SKILL.md) to a **specific topic**. Produces `PL
 | **Subject** | Component, system, feature, or explore Task |
 | **Probes** | See [Probes](#probes) |
 | **Stop condition** | No obvious divergence points remain for scope, behavior, constraints, and acceptance |
-| **Alignment artifact** | `PLAN.md` (path from WORKSPACE) |
+| **Alignment / definition artifact** | `PLAN.md` (path from WORKSPACE) |
 | **Readiness prompt** | "Does this plan look complete?" |
 
 ### Probes
+
+Use definition probes from CONCEPT_DEFINITION, specialised for a pipeline phase:
 
 - Scope boundaries (in / out)
 - UX and behavior where multiple valid implementations exist
@@ -36,13 +43,13 @@ Applies [alignment](../alignment/SKILL.md) to a **specific topic**. Produces `PL
 
 | Context | First move |
 |---------|------------|
-| **Thin** | "What do you want to design?" (or resolve Task key) |
+| **Thin** | "What do you want to define?" (or resolve Task key) |
 | **Rich** / Task key given | Load Task (+ Story, `ROADMAP.md`); first divergence question |
 
 ### Scope guard
 
-- No code, file edits, or implementation during alignment
-- No sub-agent delegation — alignment only
+- No code, file edits, or implementation during definition
+- No sub-agent delegation — alignment / definition only
 
 ## Entry (pipeline)
 
@@ -89,7 +96,7 @@ Follow one-issue continuity and the [tracker sync matrix](../workflow/reference.
 
 ### Explore Task provided (preferred)
 
-1. **Update that Task** — do not create a parallel design issue. Status stays **To Do**.
+1. **Update that Task** — do not create a parallel definition issue. Status stays **To Do**.
 2. Create **Sub-tasks** per work package — status **To Do**; link parent = Task.
 3. Write `PLAN.md`; `attach_or_link` path on the Task.
 4. `comment` Task + Story with plan path, sub-task keys, **Next**.

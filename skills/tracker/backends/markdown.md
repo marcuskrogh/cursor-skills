@@ -49,8 +49,8 @@ Design approved. Next: `/implement MD-2`
 
 | Key | Type | Title | Status | Parent | Next |
 |-----|------|-------|--------|--------|------|
-| MD-1 | Story | Forecasting | To Do | | `/design MD-2` |
-| MD-2 | Task | Forecast chart | To Do | MD-1 | `/design MD-2` |
+| MD-1 | Story | Forecasting | To Do | | `/define MD-2` |
+| MD-2 | Task | Forecast chart | To Do | MD-1 | `/define MD-2` |
 ```
 
 Keep INDEX in sync on every create/transition/handoff. The continuity mirror

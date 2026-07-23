@@ -25,7 +25,7 @@ Use `curl` or `gh`-style shell; do not commit credentials.
 |-------|---------------|----------|
 | `explore` | **Story** | **Task** per roadmap phase (linked or child) — pipeline owner |
 | `bug` | **Bug** (or **Task** with bug label) | Optional **Sub-task**s |
-| `design` | **Same explore Task** (preferred) or new **Task** / **Story** if standalone | **Sub-task** per work package |
+| `define` | **Same explore Task** (preferred) or new **Task** / **Story** if standalone | **Sub-task** per work package |
 | `model` | **Task** | — |
 | `implement` | Existing pipeline **Task** / **Story** | Existing **Sub-tasks** (or create if missing) |
 | `review` | Existing ticket in **In Review** | — |
@@ -41,7 +41,7 @@ Skills use these logical states (match to project transitions by name):
 
 | State | Used by |
 |-------|---------|
-| **To Do** / **Backlog** | New tickets from explore, design, model |
+| **To Do** / **Backlog** | New tickets from explore, define, model |
 | **In Progress** | `implement` at session start (and fix-forward) |
 | **In Review** | `implement` when PR is ready; required for `review` |
 | **Done** | `ship` after merge / confirmed closeout |

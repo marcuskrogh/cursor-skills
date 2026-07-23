@@ -2,7 +2,7 @@
 
 Agent-only. **Do not present this file to the user during alignment.**
 
-Applies the alignment [format override](../alignment/SKILL.md#format-overrides) for mathematical topics. Read with [reference.md](reference.md) for notation.
+Applies the alignment [format override](../concepts/CONCEPT_ALIGNMENT.md#format-overrides) for mathematical topics. Read with [reference.md](reference.md) for notation.
 
 ## Mandatory shape
 
