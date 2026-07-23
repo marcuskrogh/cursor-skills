@@ -31,6 +31,9 @@ Applies [CONCEPT_IMPLEMENTATION](../concepts/CONCEPT_IMPLEMENTATION.md) to the
 | **Build** (default) | Task To Do / In Progress | Full implementation loop |
 | **Fix-forward** | After **review** with blockers; same Task + open PR | Address review threads only |
 
+Post-merge follow-ups on already-shipped work use **`/iterate`** (new Task + new PR),
+not fix-forward.
+
 ## Issue (required)
 
 1. User provides key / URL

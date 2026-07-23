@@ -41,6 +41,23 @@ Task → same delivery loop. Use **explore/define** when the change is a feature
 needs product/definition decisions; use **bug** when behaviour is wrong and the fix is
 the work.
 
+### Iterate workflow (post-ship follow-up)
+
+```text
+… → ship (merged)
+        ↓
+iterate  →  review-fix  →  ship  →  (optional) iterate again …
+   │              │             │
+ITERATE.md    review↔fix     merge+Done
+ new Task       new Task      new Task
+ new branch+PR
+```
+
+**`/iterate`** is for work that **already shipped** but still needs a fix: brief
+clarify → new branch from base → implement → **new** PR → `/review-fix`. It does
+**not** replace fix-forward on an **open** PR (`/review-fix` / `/implement`). Prefer
+`/bug` for a brand-new unrelated defect with no shipped lineage.
+
 ### Side paths (same Task + shared markdown)
 
 | Skill | Artifact | When | Continuity updates |
@@ -63,6 +80,13 @@ Bug path (no inserts required):
 /bug → /implement <Task> → /review-fix <Task> → /ship <Task>
 ```
 
+Post-ship iterate path:
+
+```text
+/ship <Task> → /iterate <description> → /review-fix <NewTask> → /ship <NewTask>
+             ↘ (problems persist) ──────────────────────────────↗ /iterate …
+```
+
 ### Review-fix loop
 
 Prefer **`/review-fix`** after implement to avoid manual review↔implement iteration:
@@ -83,6 +107,7 @@ GitHub, or Linear:
 | `ROADMAP.md` | Initiative + phases + keys + **Next** (features) |
 | `PLAN.md` | Definition / plan + keys + **Next** (features) |
 | `BUG.md` | Bug report + acceptance + **Next** (bug fixes) |
+| `ITERATE.md` | Post-ship fix delta + acceptance + **Next** (iterate) |
 | `RESEARCH.md` | Literature brief + Task link + **Next** |
 | `MODEL.md` | Math spec + Task link + **Next** |
 | `docs/agents/ISSUES.md` | Mirror table (when enabled in WORKSPACE) |
@@ -101,6 +126,7 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | **bug** | Create one **Task** (+ optional Sub-tasks) from `BUG.md`. No Story unless requested. |
 | **define** | Take an explore **Task**. Enrich *that* issue (description, `PLAN.md`, Sub-tasks). Do **not** create a parallel definition ticket when an explore Task is the subject. |
 | **implement** | Work the **same Task** (and its Sub-tasks). Spec from `PLAN.md` or `BUG.md`. Branch + PR; move to **In Review**. |
+| **iterate** | After ship: create a **new** Task from `ITERATE.md` (Relates to prior); new branch from base + **new** PR; move new Task to **In Review**. |
 | **review** | One-shot Standards + Spec review; may hand off to fix-forward manually. |
 | **review-fix** | Review → fix-forward → re-review until clean (or max iterations); then ship. |
 | **ship** | Merge PR; close all open **Sub-tasks** → **Done**; Task → **Done**; Story → **Done** only when every child Task is Done; sync ISSUES + ROADMAP. |
@@ -110,6 +136,7 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | Entry | Behavior |
 |-------|----------|
 | `/bug` | Create Task from bug alignment; Next `/implement`. |
+| `/iterate` | Post-ship only; create new Task + implement + new PR; Next `/review-fix`. |
 | `/define` with no prior explore Task | Create a new Task (+ Sub-tasks) as the pipeline owner. |
 | `/implement` with an issue that already has PLAN or BUG | Allowed. |
 | Skip **define** on features | Only when already implementation-ready. Prefer define for non-trivial features. |
@@ -118,8 +145,10 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 
 - Explore Tasks → parent Story via provider parent/relates.
 - Bug Tasks are usually standalone; may **Relates** to a Story/Task if they block a phase.
+- Iterate Tasks are **new** Tasks that **Relates** to the shipped prior Task (or prior iterate Task).
 - Define/implement/review/ship comments stay on the **same Task**.
 - Comment on the parent Story at define completion and at ship (phase Done).
+- Comment on the prior Task when an iterate follow-up Task is created.
 
 ## Artifacts
 
@@ -128,10 +157,11 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | `WORKSPACE.md` | setup | Tracker and path decisions |
 | `ROADMAP.md` | explore | Project/feature scope and phase list |
 | `BUG.md` | bug | Defect report + acceptance for implement/review |
+| `ITERATE.md` | iterate | Post-ship fix delta + acceptance for implement/review |
 | `RESEARCH.md` | research | Literature brief for a phase/Task |
 | `MODEL.md` | model | Mathematical specification |
 | `PLAN.md` | define | Spec for implement + Spec-axis review |
-| Branch + PR | implement | Delivery vehicle |
+| Branch + PR | implement / iterate | Delivery vehicle (iterate always opens a **new** PR) |
 | PR review | review / review-fix | Standards + Spec findings (+ auto fix-forward in review-fix) |
 | Merge + Done | ship | Closeout |
 | *(status reply)* | summarise | About / stage / Next |
@@ -156,11 +186,12 @@ Every pipeline skill **ends** by telling the user the next invoke:
 | model | `/define <Task>` or `/implement <Task>` if plan exists |
 | define | `/implement <Task>` |
 | implement | `/review-fix <Task>` (preferred) or `/review <Task>` |
+| iterate | `/review-fix <NewTask>` |
 | review (blocking findings / `REQUEST_CHANGES`) | `/implement <Task>` (fix-forward) — or use `/review-fix` to automate |
 | review (no blockers) | `/ship <Task>` |
 | review-fix (CLEAN) | `/ship <Task>` |
 | review-fix (STOPPED / STALLED) | `/implement <Task>` or `/review <Task>` (manual) or re-run with higher max |
-| ship | Done — no next skill (or next phase / next bug) |
+| ship | Done — no next skill (or next phase / next bug); if merged work still wrong → `/iterate` |
 | summarise | *(reports Next; does not advance)* |
 
 Also write **Next** into: the issue comment (or markdown Comments section), the
@@ -171,10 +202,11 @@ alignment artifact, and the ISSUES mirror when enabled.
 | Skill | Load |
 |-------|------|
 | bug | Existing related Task/Story if linked; codebase pointers from user only |
+| iterate | Prior shipped Task + merged PR + `PLAN.md` / `BUG.md` / prior `ITERATE.md` |
 | research / model | Task (+ Story), `ROADMAP.md`, sibling artifacts (`RESEARCH.md` / `MODEL.md` / `PLAN.md`) |
 | define | Task (+ parent Story), `ROADMAP.md`, `RESEARCH.md` / `MODEL.md` if present |
 | implement | Task + Sub-tasks, `PLAN.md` or `BUG.md` / `MODEL.md` / linked specs |
-| review / review-fix | Task + PR + `PLAN.md` or `BUG.md` / specs |
+| review / review-fix | Task + PR + `PLAN.md` / `BUG.md` / `ITERATE.md` / specs |
 | ship | Task + PR + latest review outcome |
 | summarise | Task + all of the above for stage inference |
 
@@ -183,8 +215,8 @@ alignment artifact, and the ISSUES mirror when enabled.
 ```text
 To Do / Backlog  →  In Progress  →  In Review  →  Done
      explore/define      implement        implement     ship
-     research/model                       review
-     bug
+     research/model      iterate          iterate
+     bug                                  review
 ```
 
 ## Tracker sync matrix (mandatory)
@@ -196,6 +228,7 @@ enabled). Chat-only status is not enough.
 |-------|------------------------|--------------------|------------------|-------|
 | **explore** | Create Story + Task per phase; link children → Story | Leave Story/Tasks **To Do** | Story comment: child keys + **Next**; upsert ISSUES | — |
 | **bug** | Create Task (+ optional Sub-tasks); link BUG.md | Leave **To Do** | Task comment: BUG.md + **Next**; ISSUES | — |
+| **iterate** | Create **new** Task; link ITERATE.md; Relates → prior Task | New Task → **In Progress** then **In Review** when PR ready | Prior Task comment (follow-up key); new Task comments + PR + **Next** `/review-fix`; ISSUES | — (ship closes the new Task) |
 | **research** | Enrich pipeline Task (artifact link); no new Task if key given | Leave Task status unchanged (usually **To Do**) | Task comment: RESEARCH.md + summary + **Next**; ROADMAP/PLAN/ISSUES | — |
 | **model** | Enrich pipeline Task (preferred); else create Task | Leave **To Do** unless already further along | Task comment: MODEL.md + **Next**; ROADMAP/PLAN/RESEARCH/ISSUES | — |
 | **define** | Enrich Task; create Sub-tasks per work package | Task stays **To Do** (ready to implement) | Task + Story comments: PLAN.md, sub-task keys, **Next**; ISSUES | — |
@@ -239,13 +272,27 @@ When **review** leaves blocking findings and you are **not** using **review-fix*
 
 Prefer **`/review-fix <KEY>`** to run steps 1–5 automatically until clean (see that skill for max-iteration / stall guards).
 
+## Post-ship iterate
+
+When a Task is **Done** and its PR is **merged**, but the delivered behaviour is still
+wrong or incomplete:
+
+1. Next skill is **`/iterate`** (not fix-forward on the merged PR).
+2. Iterate creates a **new** Task + `ITERATE.md`, branches from base, opens a **new** PR.
+3. User runs **`/review-fix`** on the new Task, then **`/ship`**.
+4. Repeat `/iterate` if problems persist after that ship.
+
+Do **not** use `/iterate` while the original PR is still open — that is fix-forward.
+
 ## Anti-patterns
 
 - Creating issues before `WORKSPACE.md` exists (run `/setup` first)
 - Hardcoding Jira (or any single provider) when WORKSPACE selects another
 - Creating a second Task in define when an explore Task was provided
 - Ending a pipeline skill without tracker comment + **Next** (+ mirror)
-- Marking **Done** from implement or review (that is **ship**)
+- Marking **Done** from implement, iterate, or review (that is **ship**)
 - Shipping while Sub-tasks remain open
 - Closing the Story while sibling phase Tasks are still open
 - Leaving continuity only in chat or only in a remote tracker with mirror enabled but skipped
+- Opening an iterate PR while the same work still has an **open** PR (use fix-forward)
+- Reusing a merged PR / old head instead of a new branch from base for post-ship fixes

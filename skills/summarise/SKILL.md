@@ -29,13 +29,14 @@ artifacts except optionally refreshing the mirror **Next** column if it is stale
 | `ROADMAP.md` | Phase context / parent Story |
 | `PLAN.md` | Feature definition readiness |
 | `BUG.md` | Bug-fix readiness |
+| `ITERATE.md` | Post-ship iterate readiness |
 | `MODEL.md` | Model spec |
 | `RESEARCH.md` | Research brief |
 | PR (if linked) | Implement / review / ship stage |
 
 ## Infer workflow stage
 
-Detect **track**: feature if `PLAN.md` / ROADMAP phase; **bug** if `BUG.md` (or bug label/type) without a feature plan.
+Detect **track**: feature if `PLAN.md` / ROADMAP phase; **bug** if `BUG.md` (or bug label/type) without a feature plan; **iterate** if `ITERATE.md` (post-ship follow-up).
 
 Pick the furthest stage that matches evidence:
 
@@ -44,12 +45,13 @@ Pick the furthest stage that matches evidence:
 | **setup** | No WORKSPACE (tell user to `/setup`) |
 | **explore** | Story only / feature Task with no PLAN |
 | **bug** | `BUG.md` linked; not yet In Progress |
+| **iterate** | `ITERATE.md` linked (or Relates to a Done prior Task); building or about to |
 | **research** | `RESEARCH.md` linked; define not done |
 | **model** | `MODEL.md` linked; define not done |
 | **define** | Feature Task enriched but plan incomplete; or PLAN exists, not started |
 | **implement** | Status In Progress, or branch/PR WIP |
 | **review** | Status In Review; PR open (one-shot) |
-| **review-fix** | Actively looping review↔fix, or preferred post-implement stage |
+| **review-fix** | Actively looping review↔fix, or preferred post-implement/iterate stage |
 | **fix-forward** | In Review/In Progress + open `REQUEST_CHANGES` / unreplied review threads |
 | **ship-ready** | In Review + latest review clean (no blockers) |
 | **done** | Status Done / PR merged |
@@ -59,14 +61,14 @@ Pick the furthest stage that matches evidence:
 ```markdown
 # <KEY>: <title>
 
-**Track:** feature | bug
+**Track:** feature | bug | iterate
 
-**About:** <2–4 sentences from issue + PLAN/BUG/ROADMAP>
+**About:** <2–4 sentences from issue + PLAN/BUG/ITERATE/ROADMAP>
 
 **Stage:** <stage> — <one line why>
 
 **Artifacts:**
-- ROADMAP / PLAN / BUG / MODEL / RESEARCH / PR — present or missing
+- ROADMAP / PLAN / BUG / ITERATE / MODEL / RESEARCH / PR — present or missing
 
 **Status:** <To Do | In Progress | In Review | Done>
 
@@ -74,7 +76,7 @@ Pick the furthest stage that matches evidence:
 `/<skill> <KEY>` — <one-line why>
 ```
 
-If Done: **Next** is the following phase Task from ROADMAP, another bug, or "No further work on this Task."
+If Done: **Next** is the following phase Task from ROADMAP, another bug, `/iterate` when merged work still needs a fix, or "No further work on this Task."
 
 ## Rules
 
