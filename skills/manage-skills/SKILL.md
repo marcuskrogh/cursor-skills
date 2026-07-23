@@ -2,7 +2,8 @@
 name: manage-skills
 description: >-
   Maintains the agent skills repository and install workflow. Use when creating
-  a new skill, syncing skills locally, installing via skills.sh or the optional
+  a new skill, syncing skills locally, updating an existing project install to
+  latest main (or a pinned ref), installing via skills.sh or the optional
   Claude plugin, or asking how skills are distributed across Agent Skills harnesses.
 disable-model-invocation: true
 ---
@@ -58,6 +59,30 @@ claude plugin install marcus-skills@marcuskrogh
 
 Add `-WireCursorCloud` only when the project runs on Cursor Cloud and needs `.cursor/environment.json`.
 
+## Updating an existing install to latest main
+
+Consuming repos should treat updates as an explicit re-sync to a git ref (usually `main`). Pick the path that matches how skills were installed:
+
+| How skills were installed | Update to latest `main` |
+|---------------------------|-------------------------|
+| **skills.sh** (project or global) | `npx skills update -y` — or force refresh: `npx skills add marcuskrogh/skills -y` |
+| **Startup sync** (`.agents/sync-skills.sh`) | `SKILLS_REF=main bash .agents/sync-skills.sh` (default ref is already `main`) |
+| **Copied / committed** via `install-to-project.ps1` | Re-run the install script from an up-to-date clone of this repo, then commit `.agents/skills/` |
+| **Claude plugin** | Plugin tracks this repo; update/reinstall the plugin after we ship on `main` |
+
+After startup sync or `install-to-project`, check `.agents/skills/.skills-version` for `repo`, `ref`, and `sha`.
+
+If the project already has an older `.agents/sync-skills.sh`, refresh it from this repo first (re-run `setup-project-sync.ps1` or copy `templates/project-sync/sync-skills.sh`), then sync — older scripts only `git pull` and may not advance cleanly or write a version stamp.
+
+**Pin a version** (startup sync only):
+
+```bash
+SKILLS_REF=v1.2.0 bash .agents/sync-skills.sh   # tag
+SKILLS_REF=<full-sha> bash .agents/sync-skills.sh  # commit
+```
+
+Re-run with `SKILLS_REF=main` to leave the pin and track latest again.
+
 ## After every skill change (authors)
 
 ```powershell
@@ -100,4 +125,5 @@ Validates skills, syncs to local agent homes, installs git hooks so `git pull` r
 - **Keep `plugin.json` in sync** when adding or removing skills (not concepts).
 - **Prefer skills.sh** for end-user installs; keep harness-specific adapters optional and explicit.
 - **Sync after edits** so local mirrors match the repo (skills + `concepts/`).
+- **Document updates** — consumers advance with `npx skills update`, re-add, or `SKILLS_REF=main` sync; stamp lives in `.skills-version`.
 - **Do not revive base skills** (`alignment`, `implementation`) as invokable entries — use concepts instead.

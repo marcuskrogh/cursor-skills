@@ -14,6 +14,28 @@ npx skills add marcuskrogh/skills
 
 Pick the skills you want and which agents to install them for. Skills land in each agent's standard skill directory (project or global). Relative links between skills stay intact because they install as siblings under `.agents/skills/` (or the equivalent home for that agent). Concepts install alongside as `concepts/` (not invokable).
 
+## Updating skills (existing install → latest main)
+
+If a project already has skills installed and you want the newest `main`:
+
+| Install style | Command |
+|---------------|---------|
+| **skills.sh** | `npx skills update -y` |
+| **skills.sh** (force re-add) | `npx skills add marcuskrogh/skills -y` |
+| **Startup sync** | `SKILLS_REF=main bash .agents/sync-skills.sh` |
+| **Committed copy** (`install-to-project.ps1`) | Pull/clone this repo on `main`, re-run the install script, commit `.agents/skills/` |
+
+Startup sync and `install-to-project` write `.agents/skills/.skills-version` (`repo`, `ref`, `sha`, `synced_at`) so you can see what is installed.
+
+Projects that already committed an older `.agents/sync-skills.sh` should refresh that script from `templates/project-sync/sync-skills.sh` (or re-run `setup-project-sync.ps1`) before relying on `SKILLS_REF` / the version stamp.
+
+Pin a tag or commit with the sync script, then return to tracking `main` when ready:
+
+```bash
+SKILLS_REF=<tag-or-sha> bash .agents/sync-skills.sh   # pin
+SKILLS_REF=main bash .agents/sync-skills.sh           # latest main again
+```
+
 ## Optional: Claude Code plugin
 
 If you use Claude Code and prefer a managed bundle instead of editable copies:
@@ -46,7 +68,7 @@ For environments that should pull skills at startup instead of committing them:
 .\scripts\setup-project-sync.ps1 -ProjectPath C:\path\to\repo
 ```
 
-Writes `.agents/sync-skills.sh` and gitignores `.agents/skills/`.
+Writes `.agents/sync-skills.sh` and gitignores `.agents/skills/`. Each sync checks out `SKILLS_REF` (default `main`), replaces `.agents/skills/`, and records the revision in `.agents/skills/.skills-version`.
 
 If the environment is **Cursor Cloud**, also pass `-WireCursorCloud` to add `.cursor/environment.json` that runs the same sync.
 
@@ -158,6 +180,7 @@ Use `/manage-skills` for the full checklist.
 | `install-to-project.ps1` | Copy skills into a project's `.agents/skills` |
 | `validate-skills.ps1` | Frontmatter, naming, plugin.json coverage, concepts |
 | `setup-project-sync.ps1` | Wire startup sync into a project (optional `-WireCursorCloud`) |
+| `templates/project-sync/sync-skills.sh` | Startup sync: fetch `SKILLS_REF` (default `main`) → `.agents/skills/` + `.skills-version` |
 | `setup-github.ps1` | First-time push to GitHub |
 
 ## Tracker credentials

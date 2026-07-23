@@ -82,5 +82,12 @@ if ($WireCursorCloud) {
     Write-Host "Also commit .cursor/environment.json (Cursor Cloud adapter)"
 }
 Write-Host ""
+Write-Host "Sync / update to latest main (or another ref):"
+Write-Host "  bash .agents/sync-skills.sh"
+Write-Host "  SKILLS_REF=main bash .agents/sync-skills.sh          # explicit latest main"
+Write-Host "  SKILLS_REF=<tag-or-sha> bash .agents/sync-skills.sh # pin a version"
+Write-Host "Installed revision is recorded in .agents/skills/.skills-version"
+Write-Host ""
 Write-Host "Universal install (preferred for interactive use):"
 Write-Host "  npx skills add marcuskrogh/skills"
+Write-Host "  npx skills update -y   # later: pull latest for installed skills"

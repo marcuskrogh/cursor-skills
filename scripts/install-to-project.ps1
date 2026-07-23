@@ -77,8 +77,33 @@ if (Test-Path $conceptsDest) {
 Copy-Item -Path $ConceptsSource -Destination $conceptsDest -Recurse -Force
 Write-Host "Installed: concepts -> $conceptsDest"
 
+# Record which skills-repo revision was copied (for later updates).
+$sha = ""
+$ref = ""
+try {
+    $sha = (git -C $RepoRoot rev-parse HEAD 2>$null)
+    $ref = (git -C $RepoRoot rev-parse --abbrev-ref HEAD 2>$null)
+    if ($ref -eq "HEAD") { $ref = $sha }
+} catch { }
+$stampPath = Join-Path $destRoot ".skills-version"
+$stamp = @(
+    "repo=local:$RepoRoot"
+    "ref=$ref"
+    "sha=$sha"
+    "synced_at=$((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))"
+) -join "`n"
+Set-Content -Path $stampPath -Value $stamp -NoNewline
+Add-Content -Path $stampPath -Value ""
+
 Write-Host ""
 Write-Host "Installed $($toInstall.Count) skill(s) + concepts to $destRoot"
+if ($sha) {
+    Write-Host "Version stamp: $ref @ $($sha.Substring(0, [Math]::Min(7, $sha.Length))) -> $stampPath"
+}
 Write-Host "Prefer the universal installer when possible:"
 Write-Host "  npx skills add marcuskrogh/skills"
+Write-Host "To update a committed install later, re-run this script or:"
+Write-Host "  npx skills update -y"
+Write-Host "  # or force from main:"
+Write-Host "  npx skills add marcuskrogh/skills -y"
 Write-Host "Commit $TargetDir to share with collaborators and cloud environments."
