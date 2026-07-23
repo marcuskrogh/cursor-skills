@@ -64,6 +64,7 @@ Agreed agent workspace setup for this repository.
 | Roadmap | ROADMAP.md |
 | Plan | PLAN.md |
 | Bug | BUG.md |
+| Iterate | ITERATE.md |
 | Model | MODEL.md |
 | Research | RESEARCH.md |
 
@@ -84,7 +85,7 @@ record the convention here.
 
 | Field | Value |
 |-------|-------|
-| Skills | explore → (research/model) → define → implement → review-fix → ship; **or** bug → implement → review-fix → ship (+ summarise; `/review` = one-shot) |
+| Skills | explore → (research/model) → define → implement → review-fix → ship; **or** bug → implement → review-fix → ship; **or** ship → iterate → review-fix → ship (+ summarise; `/review` = one-shot) |
 | One-issue continuity | true |
 | Tracker backend | resolved via provider above (`skills/tracker` when installed) |
 
@@ -102,7 +103,7 @@ record the convention here.
 | Key prefix | `MD` |
 | Mirror | `true` |
 | Mirror path | `docs/agents/ISSUES.md` |
-| Roadmap / Plan / Model | repo root `ROADMAP.md`, `PLAN.md`, `MODEL.md` |
+| Roadmap / Plan / Bug / Iterate / Model | repo root `ROADMAP.md`, `PLAN.md`, `BUG.md`, `ITERATE.md`, `MODEL.md` |
 | Base branch | `main` |
 | Open PR | `true` |
 | Merge | `squash` if repo uses squash; else `merge` |
@@ -112,5 +113,5 @@ record the convention here.
 Regardless of remote tracker, when **Mirror to markdown** is true (recommended):
 
 1. Create/update rows in the mirror file whenever issues are created, transitioned, or handed off.
-2. Always write keys + **Next** into `ROADMAP.md` / `PLAN.md` / issue bodies.
+2. Always write keys + **Next** into `ROADMAP.md` / `PLAN.md` / `BUG.md` / `ITERATE.md` / issue bodies.
 3. Remote tracker remains authoritative for status **except** for `markdown` provider, where issue files are authoritative.

@@ -123,6 +123,9 @@ Do **not** create a Story for a lone bug unless the user asks.
 
 Then the shared delivery loop: **implement → review → ship** (same as features).
 
+If the bug is a follow-up on work that **just shipped** and the user wants one invoke
+through a new PR, prefer **`/iterate`** instead of `/bug` → `/implement`.
+
 ## Examples
 
 User: `/bug` — chart shows NaN after midnight UTC.

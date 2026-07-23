@@ -74,5 +74,7 @@ Done — phase closed.
 - Story status (still open vs **Done**)
 - PR URL
 - If Story still open: **Next** hint for the following phase Task
+- Optional: if the user reports the merge is still wrong → **Next** `/iterate <KEY> <description>`
 
-No skill handoff when the Task is Done; optional Next only points at the next phase.
+No skill handoff when the Task is Done; optional Next only points at the next phase
+or `/iterate` when post-ship follow-up is needed.

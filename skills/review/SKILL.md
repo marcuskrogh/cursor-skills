@@ -24,7 +24,7 @@ stop and tell the user.
 | Extension | This skill |
 |-----------|------------|
 | **Change source** | GitHub PR linked to the pipeline Task (or current branch) |
-| **Spec source** | Tracker issue + `PLAN.md` / `BUG.md` / `MODEL.md` |
+| **Spec source** | Tracker issue + `PLAN.md` / `BUG.md` / `ITERATE.md` / `MODEL.md` |
 | **Publish target** | GitHub PR review via `gh api` + tracker comment |
 | **Checklist** | [checklist.md](checklist.md) — paste into each sub-agent brief |
 
@@ -35,7 +35,7 @@ and **horizontally** per CONCEPT_REVIEW:
 
 | Axis | Focus |
 |------|--------|
-| **Spec** | Does the change fulfill `PLAN.md` / `BUG.md` / the tracker issue — no missing or wrong behaviour? |
+| **Spec** | Does the change fulfill `PLAN.md` / `BUG.md` / `ITERATE.md` / the tracker issue — no missing or wrong behaviour? |
 | **Correctness** | Will it work under real inputs and failures — logic, edges, errors, races, tests? |
 | **Integration** | Does it fit the rest of the system — callers, contracts, auth, data flow, config? |
 | **Standards** | Repo conventions + smell baseline (judgement calls; repo docs win). |
@@ -48,9 +48,9 @@ and **horizontally** per CONCEPT_REVIEW:
 2. If missing, ask: "Which issue is in review?"
 3. `fetch` via the tracker backend.
 4. Confirm status is **In Review** (or equivalent). If not, stop and tell the user to transition first.
-5. Capture: key, URL, summary, description, sub-tasks, links, artifact paths (`PLAN.md`, `BUG.md`, `MODEL.md`).
+5. Capture: key, URL, summary, description, sub-tasks, links, artifact paths (`PLAN.md`, `BUG.md`, `ITERATE.md`, `MODEL.md`).
 
-The tracker issue (+ linked PLAN/BUG) is the **primary spec source**.
+The tracker issue (+ linked PLAN/BUG/ITERATE) is the **primary spec source**.
 
 ### 1. Resolve the pull request
 
@@ -69,7 +69,7 @@ Sub-agents must not review hunks in isolation. The manager prepares:
 1. **Changed paths** — `gh pr diff <n> --name-only`.
 2. **Full file snapshots** for each changed source file at `HEAD` (cap: skip generated/vendor/minified; for huge files, provide ±100 lines around each hunk plus signatures/imports).
 3. **Neighbor map** — for each changed symbol/module, list likely callers/callees/tests (ripgrep for symbol names, same-package imports, `*_test.*` / `__tests__` / neighbouring files). Include those file excerpts when they clarify contracts.
-4. **Spec pack** — issue body, sub-tasks, `PLAN.md` / `BUG.md` / `MODEL.md` as applicable.
+4. **Spec pack** — issue body, sub-tasks, `PLAN.md` / `BUG.md` / `ITERATE.md` / `MODEL.md` as applicable.
 5. **Standards pack** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, linters config names if present.
 6. **Evidence from tooling** (when cheap and available in-repo): run the project's usual lint/typecheck/test for the touched area (or full suite if that is the norm). Capture failing command output as **Correctness** inputs — do not invent CI results.
 
@@ -77,7 +77,7 @@ Pass this context into every sub-agent brief.
 
 ### 3. Identify axes sources
 
-**Spec:** tracker issue → PR body → commit refs → PLAN/BUG/MODEL → user path.
+**Spec:** tracker issue → PR body → commit refs → PLAN/BUG/ITERATE/MODEL → user path.
 
 **Standards:** repo docs + smell baseline in [checklist.md](checklist.md#standards-smell-baseline). Repo docs override smells; skip tooling-enforced nits.
 

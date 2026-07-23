@@ -57,6 +57,7 @@ skills/                         ← source of truth (Agent Skills layout)
 ├── concepts/                   ← uninvokable CONCEPT_*.md (loaded only when a skill references them)
 │   ├── CONCEPT_ALIGNMENT.md
 │   ├── CONCEPT_IMPLEMENTATION.md
+│   ├── CONCEPT_ITERATION.md
 │   ├── CONCEPT_DEFINITION.md
 │   ├── CONCEPT_RESEARCH.md
 │   └── CONCEPT_REVIEW.md
@@ -67,6 +68,7 @@ skills/                         ← source of truth (Agent Skills layout)
 ├── model/                      ← mathematical alignment → MODEL.md
 ├── define/                     ← topic definition → PLAN.md (enriches pipeline Task)
 ├── implement/                  ← managed implementation from a pipeline Task
+├── iterate/                    ← post-ship fix: brief align + new branch/PR → review-fix
 ├── review/                     ← multi-axis Spec/Correctness/Integration/Standards
 ├── review-fix/                ← review ↔ fix-forward until clean
 ├── ship/                       ← merge + Done closeout
@@ -104,7 +106,13 @@ setup → explore → (research / model) → define → implement → review-fix
 setup → bug → implement → review-fix → ship
 ```
 
-`/review` remains a one-shot review; `/review-fix` loops review ↔ fix until clean. `/summarise` works anytime.
+**Post-ship iterate** (merged work still needs a fix)
+
+```text
+ship → iterate → review-fix → ship → (optional) iterate …
+```
+
+`/review` remains a one-shot review; `/review-fix` loops review ↔ fix until clean. `/iterate` opens a **new** branch/PR after ship (not fix-forward on an open PR). `/summarise` works anytime.
 
 Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, artifact links) is mirrored to markdown when enabled. See `skills/workflow/reference.md`.
 
@@ -117,6 +125,7 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | **model** | user | Math alignment → `MODEL.md` (updates Task continuity) |
 | **define** | user | Topic definition → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a pipeline Task via managed sub-agents |
+| **iterate** | user | Post-ship fix → `ITERATE.md` + new Task/branch/PR → review-fix |
 | **review** | user | Thorough multi-axis PR review (Spec, Correctness, Integration, Standards) |
 | **review-fix** | user | Review ↔ auto fix-forward until clean → ship |
 | **ship** | user | Merge PR, mark Task Done, close the phase |
