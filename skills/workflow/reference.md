@@ -127,7 +127,7 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | **define** | Take an explore **Task**. Enrich *that* issue (description, `PLAN.md`, Sub-tasks). Do **not** create a parallel definition ticket when an explore Task is the subject. |
 | **implement** | Work the **same Task** (and its Sub-tasks). Spec from `PLAN.md` or `BUG.md`. Branch + PR; move to **In Review**. |
 | **iterate** | After ship: create a **new** Task from `ITERATE.md` (Relates to prior); new branch from base + **new** PR; move new Task to **In Review**. |
-| **review** | One-shot Standards + Spec review; may hand off to fix-forward manually. |
+| **review** | One-shot multi-axis review (Spec, Correctness, Integration, Architecture, Standards); may hand off to fix-forward manually. |
 | **review-fix** | Review → fix-forward → re-review until clean (or max iterations); then ship. |
 | **ship** | Merge PR; close all open **Sub-tasks** → **Done**; Task → **Done**; Story → **Done** only when every child Task is Done; sync ISSUES + ROADMAP. |
 
@@ -162,7 +162,7 @@ continuity files — not a disconnected second ticket — when a pipeline key is
 | `MODEL.md` | model | Mathematical specification |
 | `PLAN.md` | define | Spec for implement + Spec-axis review |
 | Branch + PR | implement / iterate | Delivery vehicle (iterate always opens a **new** PR) |
-| PR review | review / review-fix | Standards + Spec findings (+ auto fix-forward in review-fix) |
+| PR review | review / review-fix | Multi-axis findings incl. Architecture (+ auto fix-forward in review-fix) |
 | Merge + Done | ship | Closeout |
 | *(status reply)* | summarise | About / stage / Next |
 

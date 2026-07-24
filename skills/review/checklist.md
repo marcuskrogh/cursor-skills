@@ -3,6 +3,8 @@
 Paste the relevant section into each sub-agent brief. Axes investigate **vertically**
 (deep within changed logic) and **horizontally** (across related modules and contracts).
 
+Axes: **Spec**, **Correctness**, **Integration**, **Architecture**, **Standards**.
+
 ## Spec
 
 ### Vertical
@@ -54,6 +56,50 @@ Paste the relevant section into each sub-agent brief. Axes investigate **vertica
 - [ ] Error mapping across layers (domain → HTTP/RPC) preserves meaning
 - [ ] Partial failure in multi-step flows does not corrupt state
 
+## Architecture
+
+Deep structural analysis of the change in context of the surrounding codebase.
+Findings must cite evidence (paths, layers, dependency edges) and propose a
+**concrete refactoring** — not vague "consider cleaning this up."
+
+Documented ADRs / architecture docs / dependency rules override generic advice.
+
+**vs Integration:** runtime contracts and auth fit → Integration; structural fit and
+refactorings → Architecture. **vs Standards:** local smells/naming → Standards;
+module/layer/design-shape problems → Architecture.
+
+### Vertical (intra-module structure)
+- [ ] New/changed logic lives in the right layer or package (not UI→DB shortcuts, not domain depending on HTTP/framework types)
+- [ ] Module cohesion: changed unit has one clear responsibility; change does not turn it into a god object/service/file
+- [ ] Abstraction quality: interfaces/ports hide the right details; no leaky abstractions exposing persistence/transport internals
+- [ ] Complexity growth: long methods/types/files made worse without an extract/split plan
+- [ ] Speculative frameworks or premature generalization introduced without a second real use
+- [ ] Composition vs inheritance / indirection: new layers earn their keep
+
+### Horizontal (system structure) — primary for this axis
+- [ ] Dependency direction respects the repo's intended architecture (domain ← application ← adapters, package rules, …)
+- [ ] No new or worsened import/package cycles across modules
+- [ ] Boundaries: feature/package seams remain clear; change does not smear one concern across many packages (shotgun surgery)
+- [ ] Divergent change: one module is not accumulating unrelated reasons to change
+- [ ] Duplication vs false sharing: extract a shared module only when concepts truly align; otherwise keep separate
+- [ ] Consistency with existing patterns (how similar features are structured in this repo)
+- [ ] ADR / architecture-doc compliance for touched areas
+- [ ] Data ownership and module APIs: who owns the model; are cross-module calls going through the right façade?
+- [ ] Extension points: change hard-codes a one-off where the codebase already has a plugin/strategy/registry pattern (or vice versa)
+- [ ] Testability structure: hard-wired collaborators that block isolating the unit without a redesign
+
+### Refactoring outcomes (use in finding bodies)
+When flagging, name a concrete move, for example:
+- Extract module / package / type for a cohesive responsibility
+- Move type or function to the correct layer
+- Invert dependency (introduce port + adapter; depend on abstraction)
+- Split god module along change-axes
+- Collapse needless indirection / speculative generality
+- Introduce a façade to hide a message chain or unstable neighbor
+- Align with an existing pattern already used for a sibling feature
+
+Severity: improvement opportunity → `note`; clear architectural regression in this PR → `should-fix`; hard documented constraint breach → `blocker`.
+
 ## Standards (smell baseline)
 
 Repo docs override. Smells are usually `note` (or `should-fix` if severe). Skip tooling-enforced style.
@@ -76,3 +122,6 @@ Repo docs override. Smells are usually `note` (or `should-fix` if severe). Skip 
 ### Vertical / horizontal for standards
 - Vertical: naming, structure, and clarity inside new functions
 - Horizontal: consistency with neighbouring modules and established patterns in the repo
+
+When a smell is really a module/layer/dependency problem, prefer an **Architecture**
+finding with a structural refactoring over a Standards note.

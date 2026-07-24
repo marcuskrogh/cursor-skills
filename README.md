@@ -91,7 +91,7 @@ skills/                         ← source of truth (Agent Skills layout)
 ├── define/                     ← topic definition → PLAN.md (enriches pipeline Task)
 ├── implement/                  ← managed implementation from a pipeline Task
 ├── iterate/                    ← post-ship fix: brief align + new branch/PR → review-fix
-├── review/                     ← multi-axis Spec/Correctness/Integration/Standards
+├── review/                     ← multi-axis Spec/Correctness/Integration/Architecture/Standards
 ├── review-fix/                ← review ↔ fix-forward until clean
 ├── ship/                       ← merge + Done closeout
 ├── summarise/                  ← status: about / stage / Next
@@ -148,7 +148,7 @@ Run `/setup` first in each consuming repo. Continuity (keys, status, **Next**, a
 | **define** | user | Topic definition → `PLAN.md` + Sub-tasks on the pipeline Task |
 | **implement** | user | Build from a pipeline Task via managed sub-agents |
 | **iterate** | user | Post-ship fix → `ITERATE.md` + new Task/branch/PR → review-fix |
-| **review** | user | Thorough multi-axis PR review (Spec, Correctness, Integration, Standards) |
+| **review** | user | Thorough multi-axis PR review (Spec, Correctness, Integration, Architecture, Standards) |
 | **review-fix** | user | Review ↔ auto fix-forward until clean → ship |
 | **ship** | user | Merge PR, mark Task Done, close the phase |
 | **summarise** | user | About / workflow stage / what to run Next |

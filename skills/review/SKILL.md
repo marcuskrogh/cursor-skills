@@ -1,9 +1,10 @@
 ---
 name: review
 description: >-
-  Thorough multi-axis GitHub PR review (Spec, Correctness, Integration, Standards)
-  with vertical and horizontal investigation. Tied to a pipeline issue in In Review;
-  posts findings on the PR and tracker; hands off to review-fix or ship.
+  Thorough multi-axis GitHub PR review (Spec, Correctness, Integration,
+  Architecture, Standards) with vertical and horizontal investigation. Tied to a
+  pipeline issue in In Review; posts findings on the PR and tracker; hands off to
+  review-fix or ship.
 ---
 
 # Review
@@ -30,7 +31,7 @@ stop and tell the user.
 
 ## Axes (this skill)
 
-Four axes run as **parallel sub-agents**. Each axis investigates both **vertically**
+Five axes run as **parallel sub-agents**. Each axis investigates both **vertically**
 and **horizontally** per CONCEPT_REVIEW:
 
 | Axis | Focus |
@@ -38,6 +39,7 @@ and **horizontally** per CONCEPT_REVIEW:
 | **Spec** | Does the change fulfill `PLAN.md` / `BUG.md` / `ITERATE.md` / the tracker issue — no missing or wrong behaviour? |
 | **Correctness** | Will it work under real inputs and failures — logic, edges, errors, races, tests? |
 | **Integration** | Does it fit the rest of the system — callers, contracts, auth, data flow, config? |
+| **Architecture** | Does it fit and improve system structure — layers, module boundaries, coupling, dependency direction, and concrete refactorings? |
 | **Standards** | Repo conventions + smell baseline (judgement calls; repo docs win). |
 
 ## Process
@@ -70,10 +72,11 @@ Sub-agents must not review hunks in isolation. The manager prepares:
 2. **Full file snapshots** for each changed source file at `HEAD` (cap: skip generated/vendor/minified; for huge files, provide ±100 lines around each hunk plus signatures/imports).
 3. **Neighbor map** — for each changed symbol/module, list likely callers/callees/tests (ripgrep for symbol names, same-package imports, `*_test.*` / `__tests__` / neighbouring files). Include those file excerpts when they clarify contracts.
 4. **Spec pack** — issue body, sub-tasks, `PLAN.md` / `BUG.md` / `ITERATE.md` / `MODEL.md` as applicable.
-5. **Standards pack** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, linters config names if present.
-6. **Evidence from tooling** (when cheap and available in-repo): run the project's usual lint/typecheck/test for the touched area (or full suite if that is the norm). Capture failing command output as **Correctness** inputs — do not invent CI results.
+5. **Architecture pack** — ADRs (`docs/adr`, `adr/`, `ARCHITECTURE.md`, …), architecture/README sections, package/module tree for touched areas, dependency or layering rules (`dependency-cruiser`, `archunit`, `eslint-plugin-boundaries`, module boundaries docs) if present. Sketch the intended layers/packages around the change.
+6. **Standards pack** — `CODING_STANDARDS.md`, `CONTRIBUTING.md`, linters config names if present.
+7. **Evidence from tooling** (when cheap and available in-repo): run the project's usual lint/typecheck/test for the touched area (or full suite if that is the norm). Capture failing command output as **Correctness** inputs — do not invent CI results.
 
-Pass this context into every sub-agent brief.
+Pass this context into every sub-agent brief. Architecture needs the architecture pack plus the neighbor map and package tree — not hunks alone.
 
 ### 3. Identify axes sources
 
@@ -81,16 +84,18 @@ Pass this context into every sub-agent brief.
 
 **Standards:** repo docs + smell baseline in [checklist.md](checklist.md#standards-smell-baseline). Repo docs override smells; skip tooling-enforced nits.
 
+**Architecture:** architecture pack + Architecture checklist in [checklist.md](checklist.md#architecture). Documented ADRs / layering rules override generic advice.
+
 **Correctness / Integration:** checklists in [checklist.md](checklist.md).
 
-### 4. Spawn four sub-agents in parallel
+### 4. Spawn five sub-agents in parallel
 
-One message, four `Task` calls (`subagent_type: "generalPurpose"`).
+One message, five `Task` calls (`subagent_type: "generalPurpose"`).
 
 Each returns **structured findings only**:
 
 ```text
-axis: Spec | Correctness | Integration | Standards
+axis: Spec | Correctness | Integration | Architecture | Standards
 severity: blocker | should-fix | note
 kind: inline | general
 path: <repo-relative>     # inline
@@ -102,6 +107,12 @@ body: <markdown: problem → evidence → suggested fix; prefix with **Axis**>
 Use CONCEPT_REVIEW severity meanings. **Budgets:** max **20** findings per axis,
 **≤800 words** per axis. Prefer fewer high-severity findings over many notes. Every
 finding needs **evidence** and a **concrete fix hint**.
+
+For **Architecture**, bodies must name the structural problem, cite evidence
+(paths, dependency edges, layer violations), and propose a **concrete refactoring**
+(extract module, invert dependency, split package, introduce port/adapter, move
+type to domain layer, collapse leaky abstraction, …) — not vague "consider
+refactoring."
 
 #### Spec sub-agent
 
@@ -119,15 +130,29 @@ Brief: Vertical deep-dive into changed functions/paths — logic bugs, edges, er
 
 Include: context pack + Integration checklist + neighbor map.
 
-Brief: Horizontal first — call graph, API/schema compatibility, authz (vertical *and* horizontal privilege), shared state, config/env, feature flags, data migrations, event contracts, error propagation across boundaries. Vertical: at each boundary crossed by the change, validate assumptions. Read neighbor files; do not stop at the hunk.
+Brief: Horizontal first — call graph, API/schema compatibility, authz (vertical *and* horizontal privilege), shared state, config/env, feature flags, data migrations, event contracts, error propagation across boundaries. Vertical: at each boundary crossed by the change, validate assumptions. Read neighbor files; do not stop at the hunk. Do **not** turn this into a redesign review — that is Architecture.
+
+#### Architecture sub-agent
+
+Include: context pack + Architecture checklist + architecture pack + neighbor map + package/module tree around changed paths.
+
+Brief: Deep structural analysis of how the change sits in the codebase.
+
+**Vertical:** Inside changed modules — cohesion, responsibility creep, wrong-layer logic (UI talking to DB, domain depending on framework details), god types/functions growing further, abstraction leaks, premature or speculative frameworks.
+
+**Horizontal:** Across packages/layers — dependency direction and cycles introduced or worsened, shotgun surgery patterns (one concern scattered), divergent change (one module serving unrelated reasons), missing or eroded boundaries, duplication that should be a shared module vs false sharing that should stay separate, consistency with existing architectural patterns and ADRs.
+
+**Refactorings:** For each finding, propose a specific structural move grounded in this repo (not a textbook lecture). Prefer improvements the PR could make now or as a clearly scoped follow-up. Severity: structural improvements → `note`; clear regression vs intended architecture → `should-fix`; hard ADR / documented layering breach → `blocker`.
+
+Do not restate Integration contract breaks or Standards naming/duplication smells unless they are symptoms of a larger structural problem — then frame them as Architecture with the structural fix.
 
 #### Standards sub-agent
 
 Include: standards pack + smell baseline.
 
-Brief: Documented standard breaches (can be `blocker`/`should-fix`) and baseline smells (`note` unless severe). Name the smell. Repo overrides baseline. Skip tooling-enforced style.
+Brief: Documented standard breaches (can be `blocker`/`should-fix`) and baseline smells (`note` unless severe). Name the smell. Repo overrides baseline. Skip tooling-enforced style. Leave structural redesign to Architecture; Standards owns local clarity and documented conventions.
 
-If the spec pack is empty, skip Spec but still run the other three; ask the user once if everything is empty of intent.
+If the spec pack is empty, skip Spec but still run the other four; ask the user once if everything is empty of intent.
 
 ### 5. Publish on the PR
 
@@ -136,7 +161,7 @@ Do **not** write review output into the repo or paste the full review in chat.
 #### 5a. Build the review
 
 1. Merge findings; keep axes separate — do not drop an axis because another is clean.
-2. Deduplicate near-identical findings (keep the higher severity / better evidence).
+2. Deduplicate near-identical findings (keep the higher severity / better evidence). Prefer Architecture over Standards when both describe the same structural issue; prefer Integration when the issue is a runtime contract break.
 3. Inline comments for `kind: inline` at RIGHT-side lines on `headRefOid`.
 4. Review body:
 
@@ -145,6 +170,7 @@ Do **not** write review output into the repo or paste the full review in chat.
 - Blockers: <n> | Should-fix: <n> | Notes: <n>
 - Vertical themes: <one line>
 - Horizontal themes: <one line>
+- Architecture themes: <one line>
 - Worst: <one line or "none">
 
 ## Spec
@@ -154,6 +180,9 @@ Do **not** write review output into the repo or paste the full review in chat.
 …
 
 ## Integration
+…
+
+## Architecture
 …
 
 ## Standards
@@ -180,7 +209,7 @@ Comment on the pipeline issue:
 PR: <url>
 Review event: …
 Blockers: <n> | Should-fix: <n> | Notes: <n>
-Spec / Correctness / Integration / Standards: <counts>
+Spec / Correctness / Integration / Architecture / Standards: <counts>
 Worst: …
 
 ## Next

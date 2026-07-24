@@ -11,9 +11,9 @@ description: >-
 
 Automates the **review ↔ implement (fix-forward)** loop on one pipeline Task and PR.
 
-Composes [review](../review/SKILL.md) (four axes: Spec, Correctness, Integration, Standards)
-and [implement](../implement/SKILL.md) fix-forward mode. Does **not** replace first-time
-**implement** (build) or **ship**.
+Composes [review](../review/SKILL.md) (five axes: Spec, Correctness, Integration,
+Architecture, Standards) and [implement](../implement/SKILL.md) fix-forward mode.
+Does **not** replace first-time **implement** (build) or **ship**.
 
 **On invoke:** read [../workflow/reference.md](../workflow/reference.md),
 [../review/SKILL.md](../review/SKILL.md), [../implement/SKILL.md](../implement/SKILL.md),
